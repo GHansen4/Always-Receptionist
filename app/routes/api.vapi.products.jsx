@@ -108,6 +108,20 @@ export async function action({ request }) {
     // ============================================
     // STEP 4: Get Valid Shopify Session
     // ============================================
+    console.log('=== SESSION LOOKUP DEBUG ===');
+    console.log('Looking for shop:', shop);
+    console.log('Shop type:', typeof shop);
+    console.log('Shop length:', shop?.length);
+    console.log('Current time:', new Date().toISOString());
+    
+    // First, check if ANY sessions exist
+    const allSessions = await db.session.findMany({
+      select: { shop: true, expires: true, id: true }
+    });
+    console.log('Total sessions in DB:', allSessions.length);
+    console.log('All sessions:', JSON.stringify(allSessions, null, 2));
+    
+    // Now try to find the specific session
     const session = await db.session.findFirst({
       where: { 
         shop,
@@ -115,7 +129,19 @@ export async function action({ request }) {
       }
     });
     
+    console.log('Session found:', !!session);
+    console.log('Session details:', session ? {
+      id: session.id.substring(0, 30),
+      shop: session.shop,
+      hasAccessToken: !!session.accessToken,
+      expires: session.expires
+    } : 'null');
+    
     if (!session || !isSessionValid(session)) {
+      console.log('❌ Session validation failed');
+      console.log('Session is null:', !session);
+      console.log('Session invalid:', session ? !isSessionValid(session) : 'n/a');
+      
       logApiRequest('products', {
         shop,
         status: 'not_found',
