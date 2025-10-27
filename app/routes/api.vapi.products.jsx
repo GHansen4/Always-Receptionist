@@ -1,4 +1,4 @@
-import db from "../db.server";
+import { createPrismaClient } from "../db.server";
 import { 
   validateVapiRequest, 
   validateShopFormat, 
@@ -26,14 +26,17 @@ export async function action({ request }) {
   console.log('DATABASE_URL_CUSTOM first 30 chars:', process.env.DATABASE_URL_CUSTOM?.substring(0, 30));
   console.log('NODE_ENV:', process.env.NODE_ENV);
   
-  const startTime = Date.now();
-  const url = new URL(request.url);
-  const shop = sanitizeShop(url.searchParams.get("shop"));
-  const search = url.searchParams.get("search") || "";
+  const db = createPrismaClient(); // Create HERE, not at module level
   
-  // ============================================
-  // STEP 1: Rate Limiting
-  // ============================================
+  try {
+    const startTime = Date.now();
+    const url = new URL(request.url);
+    const shop = sanitizeShop(url.searchParams.get("shop"));
+    const search = url.searchParams.get("search") || "";
+    
+    // ============================================
+    // STEP 1: Rate Limiting
+    // ============================================
   const rateLimit = checkRateLimit(request);
   if (rateLimit?.limited) {
     logApiRequest('products', {
@@ -212,5 +215,8 @@ export async function action({ request }) {
     
     // Generic error
     return createErrorResponse("Internal server error", 500);
+  }
+  } finally {
+    await db.$disconnect();
   }
 }
