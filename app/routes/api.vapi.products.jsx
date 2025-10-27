@@ -8,14 +8,14 @@ import {
   logApiError,
   sanitizeShop,
   isSessionValid
-} from "~/utils/vapi-auth.server.js";
-import { checkRateLimit } from "~/utils/rate-limit.server.js";
+} from "~/utils/vapi-auth.server";
+import { checkRateLimit } from "~/utils/rate-limit.server";
 import { 
   shopifyGraphQL, 
   isReinstallRequired, 
   isRateLimited,
   isGraphQLError
-} from "~/utils/shopify-client.server.js";
+} from "~/utils/shopify-client.server";
 
 export async function loader({ request }) {
   const startTime = Date.now();
