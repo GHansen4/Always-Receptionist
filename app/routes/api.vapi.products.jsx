@@ -3,37 +3,41 @@ import db from "../db.server";
 export async function action({ request }) {
   console.log('=== VAPI Products API Request ===');
   
-  // STEP 1: Authenticate VAPI Request & Get Shop
   const signature = request.headers.get("X-Vapi-Signature");
   
   if (!signature) {
-    return json({ error: "Missing X-Vapi-Signature header" }, { status: 401 });
+    return new Response(JSON.stringify({ error: "Missing X-Vapi-Signature header" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" }
+    });
   }
 
-  // Look up which shop owns this signature
   const vapiConfig = await db.vapiConfig.findUnique({
     where: { vapiSignature: signature }
   });
 
   if (!vapiConfig) {
-    return json({ error: "Invalid VAPI signature" }, { status: 401 });
+    return new Response(JSON.stringify({ error: "Invalid VAPI signature" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" }
+    });
   }
 
   const shop = vapiConfig.shop;
   console.log('Authenticated shop from VAPI signature:', shop);
 
-  // STEP 2: Get Shopify Session & Admin Context
-  // This uses Shopify's session storage to get the stored OAuth token
   const sessionId = `offline_${shop}`;
   const session = await db.session.findUnique({
     where: { id: sessionId }
   });
 
   if (!session) {
-    return json({ error: "Shop not authenticated with Shopify" }, { status: 401 });
+    return new Response(JSON.stringify({ error: "Shop not authenticated with Shopify" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" }
+    });
   }
 
-  // STEP 3: Make Authenticated GraphQL Request to Shopify
   const shopifyResponse = await fetch(
     `https://${shop}/admin/api/2024-10/graphql.json`,
     {
@@ -70,7 +74,6 @@ export async function action({ request }) {
 
   const data = await shopifyResponse.json();
 
-  // STEP 4: Format Response for VAPI
   const products = data.data?.products?.edges?.map(({ node }) => ({
     id: node.id,
     title: node.title,
@@ -79,9 +82,12 @@ export async function action({ request }) {
     inventory: node.variants.edges[0]?.node.inventoryQuantity
   })) || [];
 
-  return json({ 
+  return new Response(JSON.stringify({ 
     success: true, 
     products,
     shop 
+  }), {
+    status: 200,
+    headers: { "Content-Type": "application/json" }
   });
 }
