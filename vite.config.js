@@ -1,8 +1,10 @@
 import { reactRouter } from "@react-router/dev/vite";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
-import { vercelPreset } from '@vercel/remix'; // Add this import
+import vercelPresetPkg from '@vercel/remix'; // Change this
 import path from "path";
+
+const { vercelPreset } = vercelPresetPkg; // Add this line
 
 // Related: https://github.com/remix-run/remix/issues/2835#issuecomment-1144102176
 // Replace the HOST env var with SHOPIFY_APP_URL so that it doesn't break the Vite server.
