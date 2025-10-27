@@ -1,4 +1,3 @@
-import { json } from "react-router";  // Changed from @remix-run/node
 import db from "../db.server";
 
 export async function action({ request }) {
