@@ -17,7 +17,7 @@ import {
   isGraphQLError
 } from "~/utils/shopify-client.server";
 
-export async function loader({ request }) {
+export async function action({ request }) {
   const startTime = Date.now();
   const url = new URL(request.url);
   const shop = sanitizeShop(url.searchParams.get("shop"));
