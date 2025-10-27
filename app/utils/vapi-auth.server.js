@@ -1,22 +1,37 @@
 import crypto from "crypto";
 
 /**
- * Validates VAPI webhook requests using secret token
+ * Validates VAPI request signature
  * @param {Request} request - The incoming request
- * @returns {boolean} - Whether the request is authenticated
+ * @returns {boolean} True if valid
  */
 export function validateVapiRequest(request) {
-  const vapiSignature = request.headers.get("X-Vapi-Signature");
+  const signature = request.headers.get("X-Vapi-Signature");
+  const expectedSignature = process.env.VAPI_SECRET_TOKEN;
   
-  if (!vapiSignature || !process.env.VAPI_SECRET_TOKEN) {
+  if (!signature || !expectedSignature) {
     return false;
   }
   
-  // Use constant-time comparison to prevent timing attacks
-  return crypto.timingSafeEqual(
-    Buffer.from(vapiSignature),
-    Buffer.from(process.env.VAPI_SECRET_TOKEN)
-  );
+  // Check lengths match before timing-safe comparison
+  if (signature.length !== expectedSignature.length) {
+    return false;
+  }
+  
+  try {
+    const sigBuffer = Buffer.from(signature);
+    const expectedBuffer = Buffer.from(expectedSignature);
+    
+    // Double-check buffer lengths match
+    if (sigBuffer.length !== expectedBuffer.length) {
+      return false;
+    }
+    
+    return crypto.timingSafeEqual(sigBuffer, expectedBuffer);
+  } catch (error) {
+    console.error("Signature validation error:", error);
+    return false;
+  }
 }
 
 /**
