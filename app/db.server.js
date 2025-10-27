@@ -10,6 +10,10 @@ const globalForPrisma = global
 
 let prisma
 
+// DEBUG: Log what we have
+console.log('DATABASE_URL_CUSTOM exists:', !!process.env.DATABASE_URL_CUSTOM)
+console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL)
+
 // Use custom DATABASE_URL with connection pooling params if available
 const connectionString = process.env.DATABASE_URL_CUSTOM || process.env.DATABASE_URL
 

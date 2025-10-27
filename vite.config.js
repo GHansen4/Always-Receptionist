@@ -1,6 +1,7 @@
 import { reactRouter } from "@react-router/dev/vite";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
+import { vercelPreset } from '@vercel/remix'; // Add this import
 import path from "path";
 
 // Related: https://github.com/remix-run/remix/issues/2835#issuecomment-1144102176
@@ -49,7 +50,12 @@ export default defineConfig({
       allow: ["app", "node_modules"],
     },
   },
-  plugins: [reactRouter(), tsconfigPaths()],
+  plugins: [
+    reactRouter({
+      presets: [vercelPreset()] // Add this
+    }), 
+    tsconfigPaths()
+  ],
   resolve: {
     alias: {
       "~": path.resolve(__dirname, "./app")
