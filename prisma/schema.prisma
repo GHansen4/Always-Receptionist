@@ -1,10 +1,11 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-}
-
-generator client {
-  provider = "prisma-client-js"
 }
 
 model Session {
@@ -44,4 +45,13 @@ model CallLog {
   transcript  String?
   summary     String?
   createdAt   DateTime @default(now())
+}
+
+model VapiConfig {
+  id              String   @id @default(cuid())
+  shop            String   @unique
+  vapiSignature   String   @unique  // Each shop gets unique token
+  phoneNumber     String?  // Optional: their VAPI number
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }

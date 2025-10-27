@@ -1,251 +1,89 @@
-import { createPrismaClient } from "../db.server";
-import { 
-  validateVapiRequest, 
-  validateShopFormat, 
-  createErrorResponse, 
-  createSuccessResponse,
-  logApiRequest,
-  logApiError,
-  sanitizeShop,
-  isSessionValid
-} from "~/utils/vapi-auth.server";
-import { checkRateLimit } from "~/utils/rate-limit.server";
-import { 
-  shopifyGraphQL, 
-  isReinstallRequired, 
-  isRateLimited,
-  isGraphQLError
-} from "~/utils/shopify-client.server";
+import { json } from "@remix-run/node";
+import db from "../db.server";
+import { authenticate } from "../shopify.server";
 
 export async function action({ request }) {
-  // DEBUG: Check environment variables at runtime
-  console.log('=== RUNTIME ENV CHECK ===');
-  console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
-  console.log('DATABASE_URL_CUSTOM exists:', !!process.env.DATABASE_URL_CUSTOM);
-  console.log('DATABASE_URL first 30 chars:', process.env.DATABASE_URL?.substring(0, 30));
-  console.log('DATABASE_URL_CUSTOM first 30 chars:', process.env.DATABASE_URL_CUSTOM?.substring(0, 30));
-  console.log('NODE_ENV:', process.env.NODE_ENV);
+  console.log('=== VAPI Products API Request ===');
   
-  const db = createPrismaClient(); // Create HERE, not at module level
+  // STEP 1: Authenticate VAPI Request & Get Shop
+  const signature = request.headers.get("X-Vapi-Signature");
   
-  try {
-    const startTime = Date.now();
-    const url = new URL(request.url);
-    const shop = sanitizeShop(url.searchParams.get("shop"));
-    const search = url.searchParams.get("search") || "";
-    
-    // ============================================
-    // STEP 1: Rate Limiting
-    // ============================================
-  const rateLimit = checkRateLimit(request);
-  if (rateLimit?.limited) {
-    logApiRequest('products', {
-      shop,
-      status: 'rate_limited',
-      duration: Date.now() - startTime
-    });
-    
-    return new Response(
-      JSON.stringify({ 
-        error: "Too many requests. Please try again later.",
-        retryAfter: rateLimit.retryAfter
-      }),
-      { 
-        status: 429,
-        headers: { 
-          "Content-Type": "application/json",
-          "Retry-After": rateLimit.retryAfter.toString(),
-          "X-RateLimit-Limit": "100",
-          "X-RateLimit-Remaining": "0"
-        } 
-      }
-    );
+  if (!signature) {
+    return json({ error: "Missing X-Vapi-Signature header" }, { status: 401 });
   }
-  
-  // ============================================
-  // STEP 2: Authenticate VAPI Request
-  // ============================================
-  // NOTE: This is an external API endpoint called by VAPI, not an embedded
-  // Shopify admin route. We authenticate VAPI's request and use stored OAuth
-  // tokens to access Shopify's API. Using authenticate.admin() would be
-  // incorrect as this is not a Shopify-initiated request.
-  if (!validateVapiRequest(request)) {
-    logApiRequest('products', {
-      shop,
-      status: 'unauthorized',
-      reason: 'invalid_vapi_signature',
-      duration: Date.now() - startTime
-    });
-    
-    return createErrorResponse("Unauthorized - Invalid VAPI signature", 401);
+
+  // Look up which shop owns this signature
+  const vapiConfig = await db.vapiConfig.findUnique({
+    where: { vapiSignature: signature }
+  });
+
+  if (!vapiConfig) {
+    return json({ error: "Invalid VAPI signature" }, { status: 401 });
   }
-  
-  // ============================================
-  // STEP 3: Validate Parameters
-  // ============================================
-  if (!shop) {
-    logApiRequest('products', {
-      status: 'bad_request',
-      reason: 'missing_shop',
-      duration: Date.now() - startTime
-    });
-    
-    return createErrorResponse("Shop parameter required", 400);
+
+  const shop = vapiConfig.shop;
+  console.log('Authenticated shop from VAPI signature:', shop);
+
+  // STEP 2: Get Shopify Session & Admin Context
+  // This uses Shopify's session storage to get the stored OAuth token
+  const sessionId = `offline_${shop}`;
+  const session = await db.session.findUnique({
+    where: { id: sessionId }
+  });
+
+  if (!session) {
+    return json({ error: "Shop not authenticated with Shopify" }, { status: 401 });
   }
-  
-  if (!validateShopFormat(shop)) {
-    logApiRequest('products', {
-      shop,
-      status: 'bad_request',
-      reason: 'invalid_shop_format',
-      duration: Date.now() - startTime
-    });
-    
-    return createErrorResponse("Invalid shop format. Must be *.myshopify.com", 400);
-  }
-  
-  try {
-    // ============================================
-    // STEP 4: Get Valid Shopify Session
-    // ============================================
-    console.log('=== SESSION LOOKUP DEBUG ===');
-    console.log('Looking for shop:', shop);
-    console.log('Shop type:', typeof shop);
-    console.log('Shop length:', shop?.length);
-    console.log('Current time:', new Date().toISOString());
-    
-    // First, check if ANY sessions exist
-    const allSessions = await db.session.findMany({
-      select: { shop: true, expires: true, id: true }
-    });
-    console.log('Total sessions in DB:', allSessions.length);
-    console.log('All sessions:', JSON.stringify(allSessions, null, 2));
-    
-    // Now try to find the specific session
-    const session = await db.session.findFirst({
-      where: { 
-        shop,
-        OR: [
-          { expires: null },           // ✅ Include offline tokens (never expire)
-          { expires: { gt: new Date() } }  // ✅ Include non-expired online tokens
-        ]
-      }
-    });
-    
-    console.log('Session found:', !!session);
-    console.log('Session details:', session ? {
-      id: session.id.substring(0, 30),
-      shop: session.shop,
-      hasAccessToken: !!session.accessToken,
-      expires: session.expires
-    } : 'null');
-    
-    if (!session || !isSessionValid(session)) {
-      console.log('❌ Session validation failed');
-      console.log('Session is null:', !session);
-      console.log('Session invalid:', session ? !isSessionValid(session) : 'n/a');
-      
-      logApiRequest('products', {
-        shop,
-        status: 'not_found',
-        reason: 'session_not_found_or_expired',
-        duration: Date.now() - startTime
-      });
-      
-      return createErrorResponse(
-        "Shop not found or session expired. Please reinstall the app.", 
-        404
-      );
-    }
-    
-    // ============================================
-    // STEP 5: Call Shopify API using wrapper
-    // ============================================
-    const data = await shopifyGraphQL(
-      session,
-      `
-        query getProducts($query: String) {
-          products(first: 10, query: $query) {
-            edges {
-              node {
-                id
-                title
-                description
-                priceRange {
-                  minVariantPrice {
-                    amount
-                    currencyCode
-                  }
-                }
-                variants(first: 5) {
-                  edges {
-                    node {
-                      id
-                      title
-                      price
-                      inventoryQuantity
+
+  // STEP 3: Make Authenticated GraphQL Request to Shopify
+  const shopifyResponse = await fetch(
+    `https://${shop}/admin/api/2024-10/graphql.json`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Access-Token": session.accessToken,
+      },
+      body: JSON.stringify({
+        query: `
+          query getProducts {
+            products(first: 10) {
+              edges {
+                node {
+                  id
+                  title
+                  description
+                  variants(first: 5) {
+                    edges {
+                      node {
+                        price
+                        inventoryQuantity
+                      }
                     }
                   }
                 }
               }
             }
           }
-        }
-      `,
-      { query: search }
-    );
-    
-    // ============================================
-    // STEP 6: Success - Log and Return
-    // ============================================
-    const productCount = data.data?.products?.edges?.length || 0;
-    
-    logApiRequest('products', {
-      shop,
-      search,
-      status: 'success',
-      productCount,
-      duration: Date.now() - startTime
-    });
-    
-    return createSuccessResponse(data);
-    
-  } catch (error) {
-    logApiError('products', error, {
-      shop,
-      search,
-      duration: Date.now() - startTime
-    });
-    
-    // ============================================
-    // STEP 7: Handle Specific Error Types
-    // ============================================
-    
-    if (isReinstallRequired(error)) {
-      return createErrorResponse(
-        "Shopify authentication failed. The app may need to be reinstalled.", 
-        401
-      );
+        `
+      })
     }
-    
-    if (isRateLimited(error)) {
-      return createErrorResponse(
-        "Shopify API rate limit exceeded. Please try again later.", 
-        429
-      );
-    }
-    
-    if (isGraphQLError(error)) {
-      return createErrorResponse(
-        "Failed to query products from Shopify", 
-        500
-      );
-    }
-    
-    // Generic error
-    return createErrorResponse("Internal server error", 500);
-  }
-  } finally {
-    await db.$disconnect();
-  }
+  );
+
+  const data = await shopifyResponse.json();
+
+  // STEP 4: Format Response for VAPI
+  const products = data.data?.products?.edges?.map(({ node }) => ({
+    id: node.id,
+    title: node.title,
+    description: node.description,
+    price: node.variants.edges[0]?.node.price,
+    inventory: node.variants.edges[0]?.node.inventoryQuantity
+  })) || [];
+
+  return json({ 
+    success: true, 
+    products,
+    shop 
+  });
 }
