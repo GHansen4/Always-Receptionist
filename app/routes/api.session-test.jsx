@@ -1,6 +1,8 @@
-import db from "../db.server";
+import { createPrismaClient } from "../db.server";
 
 export async function loader() {
+  const db = createPrismaClient();
+  
   try {
     // Query sessions directly from Prisma
     const sessions = await db.session.findMany();
@@ -26,5 +28,7 @@ export async function loader() {
       }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
+  } finally {
+    await db.$disconnect();
   }
 }

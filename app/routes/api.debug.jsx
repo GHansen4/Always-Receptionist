@@ -1,8 +1,10 @@
-import db from "../db.server";
+import { createPrismaClient } from "../db.server";
 
 export async function loader({ request }) {
   const url = new URL(request.url);
   const shop = url.searchParams.get("shop");
+  
+  const db = createPrismaClient();
   
   try {
     // Get all sessions
@@ -37,5 +39,7 @@ export async function loader({ request }) {
       JSON.stringify({ error: error.message }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
+  } finally {
+    await db.$disconnect();
   }
 }

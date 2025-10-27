@@ -1,6 +1,8 @@
-import db from "../db.server";
+import { createPrismaClient } from "../db.server";
 
 export async function loader({ request }) {
+  const db = createPrismaClient();
+  
   try {
     // Get all sessions and show their shop values
     const allSessions = await db.session.findMany();
@@ -33,5 +35,7 @@ export async function loader({ request }) {
       JSON.stringify({ error: error.message }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
+  } finally {
+    await db.$disconnect();
   }
 }
