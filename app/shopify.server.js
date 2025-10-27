@@ -45,3 +45,4 @@ const shopify = shopifyApp({
 
 export default shopify;
 export const authenticate = shopify.authenticate;
+export const addDocumentResponseHeaders = shopify.addDocumentResponseHeaders;  // Add this line
