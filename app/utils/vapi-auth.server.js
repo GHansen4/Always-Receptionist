@@ -9,34 +9,12 @@ export function validateVapiRequest(request) {
   const signature = request.headers.get("X-Vapi-Signature");
   const expectedSignature = process.env.VAPI_SECRET_TOKEN;
   
-  // DETAILED DEBUG LOGGING
-  console.log("=== VAPI Signature Debug ===");
-  console.log("Received signature:", JSON.stringify(signature));
-  console.log("Expected signature:", JSON.stringify(expectedSignature));
-  console.log("Received length:", signature?.length);
-  console.log("Expected length:", expectedSignature?.length);
-  console.log("Signature exists:", !!signature);
-  console.log("Token exists:", !!expectedSignature);
-  
   if (!signature || !expectedSignature) {
-    console.log("❌ Missing signature or token");
     return false;
   }
   
   if (signature.length !== expectedSignature.length) {
-    console.log("❌ Length mismatch");
     return false;
-  }
-  
-  // Character-by-character comparison for debugging
-  if (signature !== expectedSignature) {
-    console.log("❌ Strings don't match (simple comparison)");
-    for (let i = 0; i < Math.min(signature.length, 50); i++) {
-      if (signature[i] !== expectedSignature[i]) {
-        console.log(`First difference at position ${i}: got '${signature[i]}' (${signature.charCodeAt(i)}), expected '${expectedSignature[i]}' (${expectedSignature.charCodeAt(i)})`);
-        break;
-      }
-    }
   }
   
   try {
@@ -44,15 +22,12 @@ export function validateVapiRequest(request) {
     const expectedBuffer = Buffer.from(expectedSignature);
     
     if (sigBuffer.length !== expectedBuffer.length) {
-      console.log("❌ Buffer length mismatch");
       return false;
     }
     
-    const result = crypto.timingSafeEqual(sigBuffer, expectedBuffer);
-    console.log("✅ Timing safe comparison result:", result);
-    return result;
+    return crypto.timingSafeEqual(sigBuffer, expectedBuffer);
   } catch (error) {
-    console.error("❌ Signature validation error:", error);
+    console.error("Signature validation error:", error);
     return false;
   }
 }
