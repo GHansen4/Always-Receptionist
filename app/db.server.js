@@ -6,41 +6,27 @@ import ws from 'ws'
 // Configure WebSocket for Node.js environments
 neonConfig.webSocketConstructor = ws
 
-const globalForPrisma = global
-
-let prisma
-
-function getPrismaClient() {
-  if (prisma) {
-    return prisma
-  }
-
-  // Get connection string at runtime, not module load time
-  const connectionString = process.env.DATABASE_URL_CUSTOM || process.env.DATABASE_URL
+export function createPrismaClient() {
+  // ONLY use DATABASE_URL_CUSTOM - it has the connection pooling params
+  const connectionString = process.env.DATABASE_URL_CUSTOM
+  
+  console.log('DATABASE_URL_CUSTOM value:', process.env.DATABASE_URL_CUSTOM)
   
   if (!connectionString) {
-    throw new Error('No DATABASE_URL or DATABASE_URL_CUSTOM found')
+    throw new Error('DATABASE_URL_CUSTOM is required')
   }
 
-  console.log('Creating Prisma client with connection string:', connectionString.substring(0, 30))
+  console.log('Creating Prisma client with full connection string:', connectionString)
 
   const pool = new Pool({ connectionString })
   const adapter = new PrismaNeon(pool)
   
-  prisma = new PrismaClient({ 
+  return new PrismaClient({ 
     adapter,
     log: process.env.NODE_ENV === 'production' ? ['error'] : ['query', 'error', 'warn']
   })
-
-  if (process.env.NODE_ENV !== 'production') {
-    globalForPrisma.prisma = prisma
-  }
-
-  return prisma
 }
 
-export default new Proxy({}, {
-  get(_target, prop) {
-    return getPrismaClient()[prop]
-  }
-})
+// Default export
+const db = createPrismaClient()
+export default db
