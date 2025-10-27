@@ -9,11 +9,22 @@ export function validateVapiRequest(request) {
   const signature = request.headers.get("X-Vapi-Signature");
   const expectedSignature = process.env.VAPI_SECRET_TOKEN;
   
+  // DEBUG LOGGING
+  console.log('=== VAPI Auth Debug ===');
+  console.log('Received signature:', signature);
+  console.log('Expected signature:', expectedSignature);
+  console.log('Signature exists:', !!signature);
+  console.log('Expected exists:', !!expectedSignature);
+  console.log('Signature length:', signature?.length);
+  console.log('Expected length:', expectedSignature?.length);
+  
   if (!signature || !expectedSignature) {
+    console.log('❌ Missing signature or token');
     return false;
   }
   
   if (signature.length !== expectedSignature.length) {
+    console.log('❌ Length mismatch');
     return false;
   }
   
@@ -22,12 +33,15 @@ export function validateVapiRequest(request) {
     const expectedBuffer = Buffer.from(expectedSignature);
     
     if (sigBuffer.length !== expectedBuffer.length) {
+      console.log('❌ Buffer length mismatch');
       return false;
     }
     
-    return crypto.timingSafeEqual(sigBuffer, expectedBuffer);
+    const isValid = crypto.timingSafeEqual(sigBuffer, expectedBuffer);
+    console.log('✅ Validation result:', isValid);
+    return isValid;
   } catch (error) {
-    console.error("Signature validation error:", error);
+    console.error("❌ Signature validation error:", error);
     return false;
   }
 }
