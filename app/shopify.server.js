@@ -1,7 +1,7 @@
 import { shopifyApp } from "@shopify/shopify-app-react-router/server";  // Changed!
 import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
 import { restResources } from "@shopify/shopify-api/rest/admin/2024-10";
-import prisma from "./db.server";
+import { default as prisma } from "./db.server";  // This should work
 import crypto from "crypto";
 
 const shopify = shopifyApp({
