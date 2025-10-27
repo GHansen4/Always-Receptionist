@@ -7,8 +7,17 @@ export async function action({ request }) {
   const body = await request.json();
   console.log('VAPI Request Body:', body);
   
+  console.log('=== TOOL CALLS DETAIL ===');
+  console.log('Tool Calls:', JSON.stringify(body.message?.toolCalls, null, 2));
+  console.log('Tool Call List:', JSON.stringify(body.message?.toolCallList, null, 2));
+  console.log('Tool With Tool Call List:', JSON.stringify(body.message?.toolWithToolCallList, null, 2));
+  
   // Extract toolCallId from VAPI's request
   const toolCallId = body?.message?.toolCallList?.[0]?.id || body?.toolCallId;
+  
+  console.log('Extracted toolCallId:', body?.message?.toolCallList?.[0]?.id);
+  console.log('Extracted function name:', body?.message?.toolCallList?.[0]?.function?.name);
+  console.log('Extracted arguments:', body?.message?.toolCallList?.[0]?.function?.arguments);
   
   const signature = request.headers.get("X-Vapi-Signature");
   
