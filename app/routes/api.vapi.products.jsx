@@ -1,6 +1,5 @@
 import { json } from "@remix-run/node";
 import db from "../db.server";
-import { authenticate } from "../shopify.server";
 
 export async function action({ request }) {
   console.log('=== VAPI Products API Request ===');
