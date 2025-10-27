@@ -8,17 +8,26 @@ neonConfig.webSocketConstructor = ws
 
 const globalForPrisma = global
 
-let prisma
-
-// DEBUG: Log what we have
-console.log('DATABASE_URL_CUSTOM exists:', !!process.env.DATABASE_URL_CUSTOM)
+// DEBUG: Log ALL environment variables that start with DATABASE
+console.log('=== DATABASE ENVIRONMENT VARIABLES ===')
 console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL)
+console.log('DATABASE_URL_CUSTOM exists:', !!process.env.DATABASE_URL_CUSTOM)
+console.log('DATABASE_URL value:', process.env.DATABASE_URL?.substring(0, 50) + '...')
+console.log('DATABASE_URL_CUSTOM value:', process.env.DATABASE_URL_CUSTOM?.substring(0, 50) + '...')
+
+let prisma
 
 // Use custom DATABASE_URL with connection pooling params if available
 const connectionString = process.env.DATABASE_URL_CUSTOM || process.env.DATABASE_URL
 
+console.log('Final connection string exists:', !!connectionString)
+console.log('Final connection string starts with:', connectionString?.substring(0, 20))
+
+if (!connectionString) {
+  throw new Error('No DATABASE_URL or DATABASE_URL_CUSTOM found in environment variables')
+}
+
 if (process.env.NODE_ENV === 'production') {
-  // Use Neon serverless driver adapter for production
   const pool = new Pool({ connectionString })
   const adapter = new PrismaNeon(pool)
   
@@ -28,7 +37,6 @@ if (process.env.NODE_ENV === 'production') {
   })
 } else {
   if (!globalForPrisma.prisma) {
-    // Use Neon serverless driver adapter for development too
     const pool = new Pool({ connectionString })
     const adapter = new PrismaNeon(pool)
     
