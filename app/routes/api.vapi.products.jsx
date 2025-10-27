@@ -18,6 +18,14 @@ import {
 } from "~/utils/shopify-client.server";
 
 export async function action({ request }) {
+  // DEBUG: Check environment variables at runtime
+  console.log('=== RUNTIME ENV CHECK ===');
+  console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
+  console.log('DATABASE_URL_CUSTOM exists:', !!process.env.DATABASE_URL_CUSTOM);
+  console.log('DATABASE_URL first 30 chars:', process.env.DATABASE_URL?.substring(0, 30));
+  console.log('DATABASE_URL_CUSTOM first 30 chars:', process.env.DATABASE_URL_CUSTOM?.substring(0, 30));
+  console.log('NODE_ENV:', process.env.NODE_ENV);
+  
   const startTime = Date.now();
   const url = new URL(request.url);
   const shop = sanitizeShop(url.searchParams.get("shop"));
