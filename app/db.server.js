@@ -10,8 +10,9 @@ export function createPrismaClient() {
   const connectionString = process.env.DATABASE_URL_CUSTOM
   if (!connectionString) throw new Error('Missing DATABASE_URL_CUSTOM')
   
-  const pool = new Pool({ connectionString })
-  const adapter = new PrismaNeon(pool)
+
+    const adapter = new PrismaNeon({ connectionString })
+
   return new PrismaClient({ 
     adapter,
     log: process.env.NODE_ENV === 'production' ? ['error'] : ['query', 'error', 'warn']
