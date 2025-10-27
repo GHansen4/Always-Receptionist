@@ -1,7 +1,7 @@
 {
-  "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
-  "installCommand": "npm install",
-  "framework": "react-router",
-  "outputDirectory": "build/client"
-}
+    "buildCommand": "npm run build",
+    "devCommand": "npm run dev",
+    "installCommand": "npm install && npx prisma generate",
+    "framework": "react-router",
+    "outputDirectory": "build/client"
+  }
