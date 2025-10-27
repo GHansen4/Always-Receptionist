@@ -24,6 +24,8 @@
     "node": ">=20.10"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
+    "@prisma/adapter-neon": "^6.18.0",
     "@prisma/client": "^6.16.3",
     "@react-router/dev": "^7.9.3",
     "@react-router/fs-routes": "^7.9.3",
@@ -38,7 +40,8 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router": "^7.9.3",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-tsconfig-paths": "^5.1.4",
+    "ws": "^8.18.3"
   },
   "devDependencies": {
     "@shopify/api-codegen-preset": "^1.2.0",
