@@ -125,7 +125,10 @@ export async function action({ request }) {
     const session = await db.session.findFirst({
       where: { 
         shop,
-        expires: { gt: new Date() }
+        OR: [
+          { expires: null },           // ✅ Include offline tokens (never expire)
+          { expires: { gt: new Date() } }  // ✅ Include non-expired online tokens
+        ]
       }
     });
     
