@@ -1,0 +1,244 @@
+import db from "../db.server";
+import { 
+  validateVapiRequest, 
+  validateShopFormat, 
+  createErrorResponse, 
+  createSuccessResponse,
+  logApiRequest,
+  logApiError,
+  sanitizeShop,
+  isSessionValid
+} from "~/utils/vapi-auth.server";
+import { checkRateLimit } from "~/utils/rate-limit.server";
+
+export async function loader({ request }) {
+  const startTime = Date.now();
+  const url = new URL(request.url);
+  const shop = sanitizeShop(url.searchParams.get("shop"));
+  const orderNumber = url.searchParams.get("orderNumber");
+  
+  // ============================================
+  // STEP 1: Rate Limiting
+  // ============================================
+  const rateLimit = checkRateLimit(request);
+  if (rateLimit?.limited) {
+    logApiRequest('orders', {
+      shop,
+      status: 'rate_limited',
+      duration: Date.now() - startTime
+    });
+    
+    return new Response(
+      JSON.stringify({ 
+        error: "Too many requests. Please try again later.",
+        retryAfter: rateLimit.retryAfter
+      }),
+      { 
+        status: 429,
+        headers: { 
+          "Content-Type": "application/json",
+          "Retry-After": rateLimit.retryAfter.toString(),
+          "X-RateLimit-Limit": "100",
+          "X-RateLimit-Remaining": "0"
+        } 
+      }
+    );
+  }
+  
+  // ============================================
+  // STEP 2: Authenticate VAPI Request
+  // ============================================
+  if (!validateVapiRequest(request)) {
+    logApiRequest('orders', {
+      shop,
+      status: 'unauthorized',
+      reason: 'invalid_vapi_signature',
+      duration: Date.now() - startTime
+    });
+    
+    return createErrorResponse("Unauthorized - Invalid VAPI signature", 401);
+  }
+  
+  // ============================================
+  // STEP 3: Validate Parameters
+  // ============================================
+  if (!shop) {
+    logApiRequest('orders', {
+      status: 'bad_request',
+      reason: 'missing_shop',
+      duration: Date.now() - startTime
+    });
+    
+    return createErrorResponse("Shop parameter required", 400);
+  }
+  
+  if (!validateShopFormat(shop)) {
+    logApiRequest('orders', {
+      shop,
+      status: 'bad_request',
+      reason: 'invalid_shop_format',
+      duration: Date.now() - startTime
+    });
+    
+    return createErrorResponse("Invalid shop format. Must be *.myshopify.com", 400);
+  }
+  
+  try {
+    // ============================================
+    // STEP 4: Get Valid Shopify Session
+    // ============================================
+    const session = await db.session.findFirst({
+      where: { 
+        shop,
+        expires: { gt: new Date() }
+      }
+    });
+    
+    if (!session || !isSessionValid(session)) {
+      logApiRequest('orders', {
+        shop,
+        status: 'not_found',
+        reason: 'session_not_found_or_expired',
+        duration: Date.now() - startTime
+      });
+      
+      return createErrorResponse(
+        "Shop not found or session expired. Please reinstall the app.", 
+        404
+      );
+    }
+    
+    // ============================================
+    // STEP 5: Build Query
+    // ============================================
+    const query = orderNumber ? `name:${orderNumber}` : "";
+    
+    // ============================================
+    // STEP 6: Call Shopify API
+    // ============================================
+    const shopifyResponse = await fetch(
+      `https://${shop}/admin/api/2024-10/graphql.json`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Shopify-Access-Token": session.accessToken,
+        },
+        body: JSON.stringify({
+          query: `
+            query getOrders($query: String) {
+              orders(first: 10, query: $query, sortKey: CREATED_AT, reverse: true) {
+                edges {
+                  node {
+                    id
+                    name
+                    createdAt
+                    displayFulfillmentStatus
+                    displayFinancialStatus
+                    totalPriceSet {
+                      shopMoney {
+                        amount
+                        currencyCode
+                      }
+                    }
+                    customer {
+                      firstName
+                      lastName
+                      email
+                    }
+                    lineItems(first: 10) {
+                      edges {
+                        node {
+                          title
+                          quantity
+                          variant {
+                            price
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          `,
+          variables: { query }
+        })
+      }
+    );
+    
+    // ============================================
+    // STEP 7: Handle Shopify API Response
+    // ============================================
+    if (!shopifyResponse.ok) {
+      const statusCode = shopifyResponse.status;
+      
+      logApiError('orders', 'Shopify API error', {
+        shop,
+        statusCode,
+        orderNumber,
+        duration: Date.now() - startTime
+      });
+      
+      if (statusCode === 401 || statusCode === 403) {
+        return createErrorResponse(
+          "Shopify authentication failed. The app may need to be reinstalled.", 
+          401
+        );
+      }
+      
+      if (statusCode === 429) {
+        return createErrorResponse(
+          "Shopify API rate limit exceeded. Please try again later.", 
+          429
+        );
+      }
+      
+      return createErrorResponse(
+        "Failed to fetch orders from Shopify", 
+        502
+      );
+    }
+    
+    const data = await shopifyResponse.json();
+    
+    // Check for GraphQL errors
+    if (data.errors) {
+      logApiError('orders', 'Shopify GraphQL errors', {
+        shop,
+        errors: data.errors,
+        orderNumber,
+        duration: Date.now() - startTime
+      });
+      
+      return createErrorResponse(
+        "Failed to query orders from Shopify", 
+        500
+      );
+    }
+    
+    // ============================================
+    // STEP 8: Success - Log and Return
+    // ============================================
+    const orderCount = data.data?.orders?.edges?.length || 0;
+    
+    logApiRequest('orders', {
+      shop,
+      orderNumber,
+      status: 'success',
+      orderCount,
+      duration: Date.now() - startTime
+    });
+    
+    return createSuccessResponse(data);
+    
+  } catch (error) {
+    logApiError('orders', error, {
+      shop,
+      orderNumber,
+      duration: Date.now() - startTime
+    });
+    
+    return createErrorResponse("Internal server error", 500);
+  }
+}
