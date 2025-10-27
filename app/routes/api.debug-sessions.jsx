@@ -1,4 +1,3 @@
-import { json } from "@remix-run/node";
 import { createPrismaClient } from "../db.server";
 
 export async function loader({ request }) {
@@ -36,7 +35,7 @@ export async function loader({ request }) {
       id: s.id.substring(0, 20) + '...' // Truncate long IDs
     }));
     
-    return json({
+    return Response.json({
       success: true,
       totalSessions: sessions.length,
       sessions: sessionInfo,
@@ -45,7 +44,7 @@ export async function loader({ request }) {
     
   } catch (error) {
     console.error('Error checking sessions:', error);
-    return json({
+    return Response.json({
       success: false,
       error: error.message,
       timestamp: new Date().toISOString()
