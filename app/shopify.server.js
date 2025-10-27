@@ -1,7 +1,7 @@
-import { shopifyApp } from "@shopify/shopify-app-react-router/server";  // Changed!
+import { shopifyApp } from "@shopify/shopify-app-react-router/server";
 import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
 import { restResources } from "@shopify/shopify-api/rest/admin/2024-10";
-import { default as prisma } from "./db.server";  // This should work
+import db from "./db.server.js";
 import crypto from "crypto";
 
 const shopify = shopifyApp({
@@ -14,27 +14,22 @@ const shopify = shopifyApp({
   sessionStorage: new PrismaSessionStorage(db),
   restResources,
   
-  // SHOPIFY'S PRESCRIBED HOOK FOR POST-INSTALL LOGIC
   hooks: {
     afterAuth: async ({ session, admin }) => {
       console.log('afterAuth hook triggered for shop:', session.shop);
       
-      // Register webhooks (if you have any)
       shopify.registerWebhooks({ session });
       
-      // Create or update VAPI config for this shop
       const vapiSignature = crypto.randomBytes(32).toString('hex');
       
-      await prisma.vapiConfig.upsert({
+      await db.vapiConfig.upsert({
         where: { shop: session.shop },
         update: {
-          // Update timestamp only on reinstall
           updatedAt: new Date()
         },
         create: {
           shop: session.shop,
           vapiSignature: vapiSignature,
-          // phoneNumber will be added later by merchant
         }
       });
       
@@ -45,4 +40,7 @@ const shopify = shopifyApp({
 
 export default shopify;
 export const authenticate = shopify.authenticate;
-export const addDocumentResponseHeaders = shopify.addDocumentResponseHeaders;  // Add this line
+export const addDocumentResponseHeaders = shopify.addDocumentResponseHeaders;
+export const login = shopify.login;
+export const registerWebhooks = shopify.registerWebhooks;
+export const sessionStorage = shopify.sessionStorage;
