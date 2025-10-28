@@ -1,39 +1,60 @@
-import { shopifyApp } from "@shopify/shopify-app-react-router/server";
+import "@shopify/shopify-app-react-router/adapters/node";
+import { shopifyApp, LATEST_API_VERSION } from "@shopify/shopify-app-react-router/server";
 import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
-import { restResources } from "@shopify/shopify-api/rest/admin/2024-10";
-import db from "./db.server.js";
-import crypto from "crypto";
+import { createPrismaClient } from "./db.server";
+import { createVapiAssistant } from "./utils/vapi.server";
+import { randomBytes } from "crypto";
+
+const prisma = createPrismaClient();
 
 const shopify = shopifyApp({
   apiKey: process.env.SHOPIFY_API_KEY,
   apiSecretKey: process.env.SHOPIFY_API_SECRET || "",
-  apiVersion: "2024-10",
+  apiVersion: LATEST_API_VERSION,
   scopes: process.env.SCOPES?.split(","),
   appUrl: process.env.SHOPIFY_APP_URL || "",
-  authPathPrefix: "/auth",
-  sessionStorage: new PrismaSessionStorage(db),
-  restResources,
+  sessionStorage: new PrismaSessionStorage(prisma),
   
+  // This runs after a shop successfully installs or updates the app
   hooks: {
     afterAuth: async ({ session, admin }) => {
-      console.log('afterAuth hook triggered for shop:', session.shop);
-      
-      shopify.registerWebhooks({ session });
-      
-      const vapiSignature = crypto.randomBytes(32).toString('hex');
-      
-      await db.vapiConfig.upsert({
-        where: { shop: session.shop },
-        update: {
-          updatedAt: new Date()
-        },
-        create: {
-          shop: session.shop,
-          vapiSignature: vapiSignature,
+      console.log(`Shop ${session.shop} authenticated successfully`);
+
+      try {
+        // Check if VapiConfig already exists
+        const existingConfig = await prisma.vapiConfig.findUnique({
+          where: { shop: session.shop }
+        });
+
+        if (!existingConfig) {
+          console.log(`Creating VAPI configuration for ${session.shop}...`);
+
+          // Generate unique signature for this shop
+          const vapiSignature = randomBytes(32).toString('hex');
+
+          // Create VAPI assistant
+          const assistant = await createVapiAssistant(session.shop, vapiSignature);
+          
+          console.log(`Created assistant ${assistant.id} for ${session.shop}`);
+
+          // Store in database
+          await prisma.vapiConfig.create({
+            data: {
+              shop: session.shop,
+              vapiSignature: vapiSignature,
+              assistantId: assistant.id,
+            }
+          });
+
+          console.log(`VapiConfig created for ${session.shop}`);
+        } else {
+          console.log(`VapiConfig already exists for ${session.shop}`);
         }
-      });
-      
-      console.log('VAPI config created/updated for shop:', session.shop);
+      } catch (error) {
+        console.error(`Error setting up VAPI for ${session.shop}:`, error);
+        // Don't throw - we don't want to block the OAuth flow
+        // The shop can still install, they just won't have VAPI set up yet
+      }
     },
   },
 });
