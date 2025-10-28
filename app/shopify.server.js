@@ -1,5 +1,6 @@
 import "@shopify/shopify-app-react-router/adapters/node";
-import { shopifyApp, LATEST_API_VERSION } from "@shopify/shopify-app-react-router/server";
+import { LATEST_API_VERSION } from "@shopify/shopify-api";
+import { shopifyApp } from "@shopify/shopify-app-react-router/server";
 import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
 import { createPrismaClient } from "./db.server";
 import { createVapiAssistant } from "./utils/vapi.server";
