@@ -1,4 +1,3 @@
-import { json } from "@react-router/node";
 import { useLoaderData, useSubmit, useNavigation } from "react-router";
 import { authenticate } from "../shopify.server";
 import { Page, Layout, Card, Button, Text, InlineStack, BlockStack, Banner } from "@shopify/polaris";
@@ -19,11 +18,11 @@ export async function loader({ request }) {
       }
     });
 
-    return json({
+    return {
       phoneNumber: vapiConfig?.phoneNumber || null,
       hasAssistant: !!vapiConfig?.assistantId,
       shop: session.shop,
-    });
+    };
   } finally {
     await db.$disconnect();
   }
@@ -47,17 +46,16 @@ export async function action({ request }) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          provider: "twilio", // or "vonage"
-          // You can specify area code, country, etc.
+          provider: "twilio",
         })
       });
 
       if (!vapiResponse.ok) {
         const error = await vapiResponse.json();
-        return json({ 
+        return { 
           success: false, 
           error: error.message || "Failed to provision number" 
-        }, { status: 400 });
+        };
       }
 
       const phoneNumberData = await vapiResponse.json();
@@ -71,10 +69,10 @@ export async function action({ request }) {
         }
       });
 
-      return json({ 
+      return { 
         success: true, 
         phoneNumber: phoneNumberData.number 
-      });
+      };
     }
 
     if (action === "release") {
@@ -101,17 +99,17 @@ export async function action({ request }) {
         });
       }
 
-      return json({ success: true });
+      return { success: true };
     }
 
-    return json({ success: false, error: "Invalid action" }, { status: 400 });
+    return { success: false, error: "Invalid action" };
     
   } catch (error) {
     console.error("Phone number action error:", error);
-    return json({ 
+    return { 
       success: false, 
       error: error.message 
-    }, { status: 500 });
+    };
   } finally {
     await db.$disconnect();
   }
