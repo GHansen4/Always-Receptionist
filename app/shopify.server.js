@@ -20,39 +20,58 @@ const shopify = shopifyApp({
   
   hooks: {
     afterAuth: async ({ session, admin }) => {
-      console.log("=== AFTERAUTH HOOK RUNNING ===");
-      console.log(`Shop ${session.shop} authenticated successfully`);
+      console.log("===========================================");
+      console.log("🚀 AFTERAUTH HOOK STARTED");
+      console.log("Shop:", session.shop);
+      console.log("Session ID:", session.id);
+      console.log("===========================================");
 
       try {
+        // Check if VapiConfig already exists
         const existingConfig = await prisma.vapiConfig.findUnique({
           where: { shop: session.shop }
         });
 
+        console.log("Existing config:", existingConfig);
+
         if (!existingConfig) {
-          console.log(`Creating VAPI configuration for ${session.shop}...`);
+          console.log("📝 Creating new VAPI configuration...");
 
+          // Generate unique signature
           const vapiSignature = randomBytes(32).toString('hex');
-          const assistant = await createVapiAssistant(session.shop, vapiSignature);
-          
-          console.log(`Created assistant ${assistant.id} for ${session.shop}`);
+          console.log("✅ Generated signature:", vapiSignature.substring(0, 10) + "...");
 
-          await prisma.vapiConfig.create({
+          // Create VAPI assistant
+          console.log("📞 Calling VAPI API to create assistant...");
+          const assistant = await createVapiAssistant(session.shop, vapiSignature);
+          console.log("✅ Assistant created:", assistant.id);
+
+          // Store in database
+          console.log("💾 Saving to database...");
+          const savedConfig = await prisma.vapiConfig.create({
             data: {
               shop: session.shop,
               vapiSignature: vapiSignature,
               assistantId: assistant.id,
             }
           });
+          console.log("✅ VapiConfig saved:", savedConfig);
 
-          console.log(`VapiConfig created for ${session.shop}`);
         } else {
-          console.log(`VapiConfig already exists for ${session.shop}`);
+          console.log("ℹ️ VapiConfig already exists, skipping creation");
         }
+
+        console.log("===========================================");
+        console.log("✅ AFTERAUTH HOOK COMPLETED SUCCESSFULLY");
+        console.log("===========================================");
+
       } catch (error) {
-        console.error(`Error setting up VAPI for ${session.shop}:`, {
-          message: error.message,
-          stack: error.stack
-        });
+        console.error("===========================================");
+        console.error("❌ ERROR IN AFTERAUTH HOOK");
+        console.error("Error type:", error.constructor.name);
+        console.error("Error message:", error.message);
+        console.error("Error stack:", error.stack);
+        console.error("===========================================");
       }
     },
   },

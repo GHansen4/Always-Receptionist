@@ -2,7 +2,7 @@
  * VAPI API helper functions
  */
 
-const VAPI_API_KEY = process.env.VAPI_PRIVATE_KEY;
+const VAPI_PRIVATE_KEY = process.env.VAPI_PRIVATE_KEY;
 const VAPI_BASE_URL = "https://api.vapi.ai";
 
 /**
@@ -12,7 +12,7 @@ export async function createVapiAssistant(shop, vapiSignature) {
   const response = await fetch(`${VAPI_BASE_URL}/assistant`, {
     method: "POST",
     headers: {
-      "Authorization": `Bearer ${VAPI_API_KEY}`,
+      "Authorization": `Bearer ${VAPI_PRIVATE_KEY}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
@@ -62,7 +62,7 @@ export async function deleteVapiAssistant(assistantId) {
   const response = await fetch(`${VAPI_BASE_URL}/assistant/${assistantId}`, {
     method: "DELETE",
     headers: {
-      "Authorization": `Bearer ${VAPI_API_KEY}`,
+      "Authorization": `Bearer ${VAPI_PRIVATE_KEY}`,
     },
   });
 
@@ -80,7 +80,7 @@ export async function updateVapiAssistant(assistantId, updates) {
   const response = await fetch(`${VAPI_BASE_URL}/assistant/${assistantId}`, {
     method: "PATCH",
     headers: {
-      "Authorization": `Bearer ${VAPI_API_KEY}`,
+      "Authorization": `Bearer ${VAPI_PRIVATE_KEY}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify(updates),
