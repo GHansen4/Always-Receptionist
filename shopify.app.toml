@@ -2,7 +2,7 @@
 
 client_id = "5c4caef303b1976903184f8de009261c"
 name = "ALWAYS Receptionist"
-application_url = "https://example.com"
+application_url = "https://always-receptionist.vercel.app"
 embedded = true
 
 [build]
@@ -25,4 +25,7 @@ api_version = "2026-01"
 scopes = "read_products,read_inventory"
 
 [auth]
-redirect_urls = [ "https://example.com/api/auth" ]
+redirect_urls = [
+  "https://always-receptionist.vercel.app/auth/callback",
+  "https://always-receptionist.vercel.app/auth/shopify/callback"
+]
