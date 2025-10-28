@@ -20,58 +20,82 @@ const shopify = shopifyApp({
   
   hooks: {
     afterAuth: async ({ session, admin }) => {
-      console.log("===========================================");
+      console.log("\n" + "=".repeat(60));
       console.log("🚀 AFTERAUTH HOOK STARTED");
+      console.log("=".repeat(60));
       console.log("Shop:", session.shop);
       console.log("Session ID:", session.id);
-      console.log("===========================================");
+      console.log("Access Token exists:", !!session.accessToken);
+      console.log("Environment check:");
+      console.log("  - VAPI_PRIVATE_KEY exists:", !!process.env.VAPI_PRIVATE_KEY);
+      console.log("  - DATABASE_URL exists:", !!process.env.DATABASE_URL);
+      console.log("=".repeat(60) + "\n");
 
       try {
         // Check if VapiConfig already exists
+        console.log("📊 Checking database for existing config...");
         const existingConfig = await prisma.vapiConfig.findUnique({
           where: { shop: session.shop }
         });
 
-        console.log("Existing config:", existingConfig);
-
-        if (!existingConfig) {
-          console.log("📝 Creating new VAPI configuration...");
-
-          // Generate unique signature
-          const vapiSignature = randomBytes(32).toString('hex');
-          console.log("✅ Generated signature:", vapiSignature.substring(0, 10) + "...");
-
-          // Create VAPI assistant
-          console.log("📞 Calling VAPI API to create assistant...");
-          const assistant = await createVapiAssistant(session.shop, vapiSignature);
-          console.log("✅ Assistant created:", assistant.id);
-
-          // Store in database
-          console.log("💾 Saving to database...");
-          const savedConfig = await prisma.vapiConfig.create({
-            data: {
-              shop: session.shop,
-              vapiSignature: vapiSignature,
-              assistantId: assistant.id,
-            }
-          });
-          console.log("✅ VapiConfig saved:", savedConfig);
-
-        } else {
-          console.log("ℹ️ VapiConfig already exists, skipping creation");
+        if (existingConfig) {
+          console.log("✅ VapiConfig already exists for", session.shop);
+          console.log("   Assistant ID:", existingConfig.assistantId);
+          console.log("   Phone Number:", existingConfig.phoneNumber || "None");
+          console.log("=".repeat(60) + "\n");
+          return; // Exit early
         }
 
-        console.log("===========================================");
+        console.log("📝 No existing config found. Creating new one...\n");
+
+        // Generate unique signature
+        console.log("🔐 Step 1: Generating signature...");
+        const vapiSignature = randomBytes(32).toString('hex');
+        console.log("✅ Signature generated:", vapiSignature.substring(0, 16) + "...");
+
+        // Create VAPI assistant
+        console.log("\n📞 Step 2: Creating VAPI assistant...");
+        console.log("   Calling createVapiAssistant()...");
+        
+        const assistant = await createVapiAssistant(session.shop, vapiSignature);
+        
+        console.log("✅ VAPI assistant created successfully!");
+        console.log("   Assistant ID:", assistant.id);
+        console.log("   Assistant Name:", assistant.name);
+
+        // Store in database
+        console.log("\n💾 Step 3: Saving to database...");
+        const savedConfig = await prisma.vapiConfig.create({
+          data: {
+            shop: session.shop,
+            vapiSignature: vapiSignature,
+            assistantId: assistant.id,
+          }
+        });
+
+        console.log("✅ VapiConfig saved to database!");
+        console.log("   ID:", savedConfig.id);
+        console.log("   Shop:", savedConfig.shop);
+        console.log("   Assistant ID:", savedConfig.assistantId);
+
+        console.log("\n" + "=".repeat(60));
         console.log("✅ AFTERAUTH HOOK COMPLETED SUCCESSFULLY");
-        console.log("===========================================");
+        console.log("=".repeat(60) + "\n");
 
       } catch (error) {
-        console.error("===========================================");
+        console.error("\n" + "=".repeat(60));
         console.error("❌ ERROR IN AFTERAUTH HOOK");
-        console.error("Error type:", error.constructor.name);
-        console.error("Error message:", error.message);
-        console.error("Error stack:", error.stack);
-        console.error("===========================================");
+        console.error("=".repeat(60));
+        console.error("Error Type:", error.constructor.name);
+        console.error("Error Message:", error.message);
+        console.error("\nFull Error Object:");
+        console.error(JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
+        console.error("\nStack Trace:");
+        console.error(error.stack);
+        console.error("=".repeat(60) + "\n");
+        
+        // Don't throw - we don't want to block OAuth
+        // But log it clearly so we can see what failed
       }
     },
   },
