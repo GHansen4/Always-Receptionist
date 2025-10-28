@@ -50,8 +50,10 @@ model CallLog {
 model VapiConfig {
   id              String   @id @default(cuid())
   shop            String   @unique
-  vapiSignature   String   @unique  // Each shop gets unique token
-  phoneNumber     String?  // Optional: their VAPI number
+  vapiSignature   String   @unique
+  assistantId     String?  // VAPI assistant ID
+  phoneNumber     String?  // VAPI phone number
+  phoneNumberId   String?  // VAPI phone number ID (for API operations)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
