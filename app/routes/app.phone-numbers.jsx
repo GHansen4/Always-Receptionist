@@ -4,9 +4,9 @@ import prisma from "../db.server";
 
 // Loader: Get current phone number status
 export async function loader({ request }) {
-  const { session } = await authenticate.admin(request);
-
   try {
+    const { session } = await authenticate.admin(request);
+
     const vapiConfig = await prisma.vapiConfig.findUnique({
       where: { shop: session.shop },
       select: {
@@ -21,6 +21,9 @@ export async function loader({ request }) {
       hasAssistant: !!vapiConfig?.assistantId,
       shop: session.shop,
     };
+  } catch (error) {
+    console.error("Error loading phone numbers:", error);
+    return { error: error.message };
   }
 }
 
