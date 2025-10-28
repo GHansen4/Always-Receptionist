@@ -1,25 +1,17 @@
 import { authenticate } from "../shopify.server";
-import prisma from "../db.server";
 
 export const action = async ({ request }) => {
-  const { payload, session, topic, shop } = await authenticate.webhook(request);
-
-  console.log(`Received ${topic} webhook for ${shop}`);
-  const current = payload.current;
-
-
   try {
-    if (session) {
-      await prisma.session.update({
-        where: {
-          id: session.id,
-        },
-        data: {
-          scope: current.toString(),
-        },
-      });
-    }
+    const { shop, session, topic } = await authenticate.webhook(request);
+
+    console.log(`Received ${topic} webhook for ${shop}`);
+
+    // Handle scopes update if needed
+    // For now, just log it
 
     return new Response();
+  } catch (error) {
+    console.error(`Error processing webhook:`, error);
+    return new Response("Internal Server Error", { status: 500 });
   }
 };
