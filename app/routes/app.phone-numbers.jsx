@@ -1,6 +1,5 @@
 import { useLoaderData, useSubmit, useNavigation } from "react-router";
 import { authenticate } from "../shopify.server";
-import { Page, Layout, Card, Button, Text, InlineStack, BlockStack, Banner } from "@shopify/polaris";
 import { createPrismaClient } from "../db.server";
 
 // Loader: Get current phone number status
@@ -115,9 +114,9 @@ export async function action({ request }) {
   }
 }
 
-// Component
+// Component using Polaris web components
 export default function PhoneNumbers() {
-  const { phoneNumber, hasAssistant, shop } = useLoaderData();
+  const { phoneNumber, hasAssistant } = useLoaderData();
   const submit = useSubmit();
   const navigation = useNavigation();
   const isLoading = navigation.state !== "idle";
@@ -137,97 +136,94 @@ export default function PhoneNumbers() {
   };
 
   return (
-    <Page
-      title="Phone Numbers"
-      subtitle="Manage your AI receptionist phone numbers"
-    >
-      <Layout>
+    <s-page title="Phone Numbers">
+      <s-layout>
         {!hasAssistant && (
-          <Layout.Section>
-            <Banner tone="warning">
+          <s-layout-section>
+            <s-banner tone="warning">
               <p>Your AI assistant is not configured yet. Please complete setup first.</p>
-            </Banner>
-          </Layout.Section>
+            </s-banner>
+          </s-layout-section>
         )}
 
-        <Layout.Section>
-          <Card>
-            <BlockStack gap="400">
-              <Text variant="headingMd" as="h2">
+        <s-layout-section>
+          <s-card>
+            <s-block-stack gap="400">
+              <s-text variant="headingMd" as="h2">
                 Active Phone Number
-              </Text>
+              </s-text>
 
               {phoneNumber ? (
-                <BlockStack gap="300">
-                  <InlineStack align="space-between" blockAlign="center">
-                    <BlockStack gap="100">
-                      <Text variant="headingLg" as="p">
+                <s-block-stack gap="300">
+                  <s-inline-stack align="space-between" block-align="center">
+                    <s-block-stack gap="100">
+                      <s-text variant="headingLg" as="p">
                         {phoneNumber}
-                      </Text>
-                      <Text variant="bodySm" tone="subdued">
+                      </s-text>
+                      <s-text variant="bodySm" tone="subdued">
                         This number is active and receiving calls
-                      </Text>
-                    </BlockStack>
+                      </s-text>
+                    </s-block-stack>
                     
-                    <Button
+                    <s-button
                       tone="critical"
                       onClick={handleRelease}
                       loading={isLoading}
                       disabled={isLoading}
                     >
                       Release Number
-                    </Button>
-                  </InlineStack>
+                    </s-button>
+                  </s-inline-stack>
 
-                  <Banner tone="info">
+                  <s-banner tone="info">
                     <p>
                       Test your AI receptionist by calling <strong>{phoneNumber}</strong>
                     </p>
-                  </Banner>
-                </BlockStack>
+                  </s-banner>
+                </s-block-stack>
               ) : (
-                <BlockStack gap="300">
-                  <Text tone="subdued">
+                <s-block-stack gap="300">
+                  <s-text tone="subdued">
                     No phone number provisioned yet. Get started by provisioning your first number.
-                  </Text>
+                  </s-text>
                   
-                  <InlineStack>
-                    <Button
+                  <s-inline-stack>
+                    <s-button
                       variant="primary"
                       onClick={handleProvision}
                       loading={isLoading}
                       disabled={isLoading || !hasAssistant}
                     >
                       Provision Phone Number
-                    </Button>
-                  </InlineStack>
+                    </s-button>
+                  </s-inline-stack>
 
                   {!hasAssistant && (
-                    <Text variant="bodySm" tone="subdued">
+                    <s-text variant="bodySm" tone="subdued">
                       Complete assistant setup before provisioning a number
-                    </Text>
+                    </s-text>
                   )}
-                </BlockStack>
+                </s-block-stack>
               )}
-            </BlockStack>
-          </Card>
-        </Layout.Section>
+            </s-block-stack>
+          </s-card>
+        </s-layout-section>
 
-        <Layout.Section>
-          <Card>
-            <BlockStack gap="200">
-              <Text variant="headingMd" as="h2">
+        <s-layout-section>
+          <s-card>
+            <s-block-stack gap="200">
+              <s-text variant="headingMd" as="h2">
                 How it works
-              </Text>
-              <Text tone="subdued">
+              </s-text>
+              <s-text tone="subdued">
                 When you provision a phone number, customers can call your AI receptionist 24/7. 
                 The AI can answer questions about products, check inventory, and help customers 
                 find what they're looking for.
-              </Text>
-            </BlockStack>
-          </Card>
-        </Layout.Section>
-      </Layout>
-    </Page>
+              </s-text>
+            </s-block-stack>
+          </s-card>
+        </s-layout-section>
+      </s-layout>
+    </s-page>
   );
 }
