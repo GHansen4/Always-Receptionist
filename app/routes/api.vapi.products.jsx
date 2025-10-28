@@ -1,7 +1,9 @@
-import db from "../db.server";
+import { createPrismaClient } from "../db.server";
 
 export async function action({ request }) {
   console.log('=== VAPI Products API Request ===');
+  
+  const db = createPrismaClient();
   
   try {
     // Parse the incoming request from VAPI
@@ -202,5 +204,7 @@ export async function action({ request }) {
         result: `Error: ${error.message}`
       }]
     }, { status: 500 });
+  } finally {
+    await db.$disconnect();
   }
 }
