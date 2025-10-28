@@ -1,6 +1,5 @@
 import "@shopify/shopify-app-react-router/adapters/node";
 import { shopifyApp } from "@shopify/shopify-app-react-router/server";
-import { LATEST_API_VERSION } from "@shopify/shopify-api";
 import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
 import { createPrismaClient } from "./db.server";
 import { createVapiAssistant } from "./utils/vapi.server";
@@ -11,7 +10,7 @@ const prisma = createPrismaClient();
 const shopify = shopifyApp({
   apiKey: process.env.SHOPIFY_API_KEY,
   apiSecretKey: process.env.SHOPIFY_API_SECRET || "",
-  apiVersion: LATEST_API_VERSION,
+  apiVersion: "2024-10", // Use the current stable API version
   scopes: process.env.SCOPES?.split(","),
   appUrl: process.env.SHOPIFY_APP_URL || "",
   authPathPrefix: "/auth",
