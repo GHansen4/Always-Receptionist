@@ -15,5 +15,8 @@ export const action = async ({ request }) => {
     }
 
     return new Response();
+  } catch (error) {
+    console.error(`Error processing ${topic} webhook for ${shop}:`, error);
+    return new Response("Internal Server Error", { status: 500 });
   }
 };
