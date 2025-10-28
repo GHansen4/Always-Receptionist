@@ -1,4 +1,4 @@
-import { createPrismaClient } from "../db.server";
+import prisma from "../db.server";
 
 /**
  * Get a valid session for a shop
@@ -8,10 +8,8 @@ import { createPrismaClient } from "../db.server";
 export async function getValidSession(shop) {
   if (!shop) return null;
   
-  const db = createPrismaClient();
-  
   try {
-    const session = await db.session.findFirst({
+    const session = await prisma.session.findFirst({
       where: { 
         shop,
         expires: { gt: new Date() }
@@ -31,8 +29,6 @@ export async function getValidSession(shop) {
   } catch (error) {
     console.error('Error fetching session:', error);
     return null;
-  } finally {
-    await db.$disconnect();
   }
 }
 

@@ -1,11 +1,10 @@
-import { createPrismaClient } from "../db.server";
+import prisma from "../db.server";
 
 export async function loader() {
-  const db = createPrismaClient();
   
   try {
     // Query sessions directly from Prisma
-    const sessions = await db.session.findMany();
+    const sessions = await prisma.session.findMany();
     
     return new Response(
       JSON.stringify({
@@ -28,7 +27,5 @@ export async function loader() {
       }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
-  } finally {
-    await db.$disconnect();
   }
 }

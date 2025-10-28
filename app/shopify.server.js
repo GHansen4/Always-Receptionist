@@ -1,11 +1,12 @@
 import "@shopify/shopify-app-react-router/adapters/node";
 import { shopifyApp } from "@shopify/shopify-app-react-router/server";
 import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
-import { createPrismaClient } from "./db.server";
+import prisma from "./db.server";
+
+
+
 import { createVapiAssistant } from "./utils/vapi.server";
 import { randomBytes } from "crypto";
-
-const prisma = createPrismaClient();
 
 const shopify = shopifyApp({
   apiKey: process.env.SHOPIFY_API_KEY,

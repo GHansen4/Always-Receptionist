@@ -1,14 +1,13 @@
 import { useLoaderData, useSubmit, useNavigation } from "react-router";
 import { authenticate } from "../shopify.server";
-import { createPrismaClient } from "../db.server";
+import prisma from "../db.server";
 
 // Loader: Get current phone number status
 export async function loader({ request }) {
   const { session } = await authenticate.admin(request);
-  const db = createPrismaClient();
 
   try {
-    const vapiConfig = await db.vapiConfig.findUnique({
+    const vapiConfig = await prisma.vapiConfig.findUnique({
       where: { shop: session.shop },
       select: {
         phoneNumber: true,
@@ -22,8 +21,6 @@ export async function loader({ request }) {
       hasAssistant: !!vapiConfig?.assistantId,
       shop: session.shop,
     };
-  } finally {
-    await db.$disconnect();
   }
 }
 
@@ -32,8 +29,6 @@ export async function action({ request }) {
   const { session } = await authenticate.admin(request);
   const formData = await request.formData();
   const action = formData.get("action");
-
-  const db = createPrismaClient();
 
   try {
     if (action === "provision") {
@@ -60,7 +55,7 @@ export async function action({ request }) {
       const phoneNumberData = await vapiResponse.json();
 
       // Update database with phone number
-      await db.vapiConfig.update({
+      await prisma.vapiConfig.update({
         where: { shop: session.shop },
         data: {
           phoneNumber: phoneNumberData.number,
@@ -75,7 +70,7 @@ export async function action({ request }) {
     }
 
     if (action === "release") {
-      const vapiConfig = await db.vapiConfig.findUnique({
+      const vapiConfig = await prisma.vapiConfig.findUnique({
         where: { shop: session.shop }
       });
 
@@ -89,7 +84,7 @@ export async function action({ request }) {
         });
 
         // Update database
-        await db.vapiConfig.update({
+        await prisma.vapiConfig.update({
           where: { shop: session.shop },
           data: {
             phoneNumber: null,
@@ -109,8 +104,6 @@ export async function action({ request }) {
       success: false, 
       error: error.message 
     };
-  } finally {
-    await db.$disconnect();
   }
 }
 

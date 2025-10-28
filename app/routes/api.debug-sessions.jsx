@@ -1,13 +1,11 @@
-import { createPrismaClient } from "../db.server";
+import prisma from "../db.server";
 
 export async function loader({ request }) {
-  const db = createPrismaClient();
-  
   try {
     console.log('=== Checking sessions in database ===');
     
     // Get all sessions
-    const sessions = await db.session.findMany({
+    const sessions = await prisma.session.findMany({
       select: {
         id: true,
         shop: true,
@@ -49,7 +47,5 @@ export async function loader({ request }) {
       error: error.message,
       timestamp: new Date().toISOString()
     }, { status: 500 });
-  } finally {
-    await db.$disconnect();
   }
 }

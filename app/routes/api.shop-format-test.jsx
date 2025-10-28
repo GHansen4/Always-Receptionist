@@ -1,11 +1,10 @@
-import { createPrismaClient } from "../db.server";
+import prisma from "../db.server";
 
 export async function loader({ request }) {
-  const db = createPrismaClient();
   
   try {
     // Get all sessions and show their shop values
-    const allSessions = await db.session.findMany();
+    const allSessions = await prisma.session.findMany();
     
     // Also try various shop formats
     const formats = [
@@ -16,7 +15,7 @@ export async function loader({ request }) {
     
     const results = {};
     for (const format of formats) {
-      const session = await db.session.findFirst({
+      const session = await prisma.session.findFirst({
         where: { shop: format }
       });
       results[format] = session ? "FOUND" : "NOT FOUND";
@@ -35,7 +34,5 @@ export async function loader({ request }) {
       JSON.stringify({ error: error.message }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
-  } finally {
-    await db.$disconnect();
   }
 }

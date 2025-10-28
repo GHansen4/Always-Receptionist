@@ -1,9 +1,7 @@
-import { createPrismaClient } from "../db.server";
+import prisma from "../db.server";
 
 export async function action({ request }) {
   console.log('=== VAPI Products API Request ===');
-  
-  const db = createPrismaClient();
   
   try {
     // Parse the incoming request from VAPI
@@ -42,7 +40,7 @@ export async function action({ request }) {
     console.log('Step 3: Looking up shop by signature...');
     console.log('Looking for signature:', signature);
     
-    const vapiConfig = await db.vapiConfig.findUnique({
+    const vapiConfig = await prisma.vapiConfig.findUnique({
       where: { vapiSignature: signature }
     });
     
@@ -69,7 +67,7 @@ export async function action({ request }) {
     const sessionId = `offline_${shop}`;
     console.log('Looking for session ID:', sessionId);
     
-    const session = await db.session.findUnique({
+    const session = await prisma.session.findUnique({
       where: { id: sessionId }
     });
     
@@ -204,7 +202,5 @@ export async function action({ request }) {
         result: `Error: ${error.message}`
       }]
     }, { status: 500 });
-  } finally {
-    await db.$disconnect();
   }
 }

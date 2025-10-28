@@ -1,17 +1,16 @@
-import { createPrismaClient } from "../db.server";
+import prisma from "../db.server";
 
 export async function loader({ request }) {
   const url = new URL(request.url);
   const shop = url.searchParams.get("shop");
   
-  const db = createPrismaClient();
   
   try {
     // Get all sessions
-    const allSessions = await db.session.findMany();
+    const allSessions = await prisma.session.findMany();
     
     // Get specific session if shop provided
-    const specificSession = shop ? await db.session.findFirst({
+    const specificSession = shop ? await prisma.session.findFirst({
       where: { shop }
     }) : null;
     
@@ -39,7 +38,5 @@ export async function loader({ request }) {
       JSON.stringify({ error: error.message }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
-  } finally {
-    await db.$disconnect();
   }
 }

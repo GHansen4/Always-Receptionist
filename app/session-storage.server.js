@@ -1,6 +1,6 @@
 // /app/session-storage.server.js
 import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
-import { createPrismaClient } from "./db.server";
+import prisma from "./db.server";
 
 /**
  * Lazy session storage that creates the Prisma client on first use
@@ -15,7 +15,7 @@ class LazyPrismaSessionStorage {
   _getStorage() {
     if (!this._storage) {
       console.log('Initializing session storage with Prisma client...');
-      this._client = createPrismaClient();
+      this._client = prisma;
       this._storage = new PrismaSessionStorage(this._client);
     }
     return this._storage;

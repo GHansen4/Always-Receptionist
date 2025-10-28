@@ -1,5 +1,5 @@
 import { authenticate } from "../shopify.server";
-import { createPrismaClient } from "../db.server";
+import prisma from "../db.server";
 
 export const action = async ({ request }) => {
   const { payload, session, topic, shop } = await authenticate.webhook(request);
@@ -7,11 +7,10 @@ export const action = async ({ request }) => {
   console.log(`Received ${topic} webhook for ${shop}`);
   const current = payload.current;
 
-  const db = createPrismaClient();
 
   try {
     if (session) {
-      await db.session.update({
+      await prisma.session.update({
         where: {
           id: session.id,
         },
@@ -22,7 +21,5 @@ export const action = async ({ request }) => {
     }
 
     return new Response();
-  } finally {
-    await db.$disconnect();
   }
 };

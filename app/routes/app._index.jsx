@@ -3,7 +3,7 @@ import { useFetcher, useLoaderData } from "react-router";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
-import { createPrismaClient } from "../db.server";
+import prisma from "../db.server";
 
 export const loader = async ({ request }) => {
   const { session } = await authenticate.admin(request);
@@ -11,8 +11,6 @@ export const loader = async ({ request }) => {
   
   console.log("=== DEBUG: Index Route Loader ===");
   console.log("Shop:", shop);
-  
-  const prisma = createPrismaClient();
   
   try {
     // Check what's in the database
