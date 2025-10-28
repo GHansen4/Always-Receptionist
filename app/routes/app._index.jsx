@@ -3,11 +3,72 @@ import { useFetcher } from "react-router";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
+import { createPrismaClient } from "../db.server";
 
 export const loader = async ({ request }) => {
-  await authenticate.admin(request);
-
-  return null;
+  const { session } = await authenticate.admin(request);
+  const shop = session.shop;
+  
+  console.log("=== DEBUG: Index Route Loader ===");
+  console.log("Shop:", shop);
+  
+  const prisma = createPrismaClient();
+  
+  try {
+    // Check what's in the database
+    const vapiConfig = await prisma.vapiConfig.findUnique({
+      where: { shop }
+    });
+    
+    console.log("VapiConfig from DB:", JSON.stringify(vapiConfig, null, 2));
+    
+    if (vapiConfig) {
+      console.log("Assistant ID:", vapiConfig.assistantId);
+      console.log("Phone Number:", vapiConfig.phoneNumber);
+      console.log("Signature exists:", !!vapiConfig.vapiSignature);
+    } else {
+      console.log("No VapiConfig found for this shop");
+    }
+    
+    // Check if we can reach VAPI API
+    if (vapiConfig?.assistantId) {
+      try {
+        const response = await fetch(`https://api.vapi.ai/assistant/${vapiConfig.assistantId}`, {
+          headers: {
+            'Authorization': `Bearer ${process.env.VAPI_PRIVATE_KEY}`
+          }
+        });
+        console.log("VAPI API response status:", response.status);
+        if (response.ok) {
+          const assistant = await response.json();
+          console.log("Assistant exists in VAPI:", assistant.name);
+        } else {
+          console.log("VAPI API error:", await response.text());
+        }
+      } catch (vapiError) {
+        console.log("Error checking VAPI:", vapiError.message);
+      }
+    }
+    
+    return {
+      shop,
+      vapiConfig,
+      isConfigured: !!vapiConfig?.assistantId,
+      hasPhoneNumber: !!vapiConfig?.phoneNumber
+    };
+    
+  } catch (error) {
+    console.error("Error in loader:", error);
+    return {
+      shop,
+      vapiConfig: null,
+      isConfigured: false,
+      hasPhoneNumber: false,
+      error: error.message
+    };
+  } finally {
+    await prisma.$disconnect();
+  }
 };
 
 export const action = async ({ request }) => {
@@ -76,11 +137,14 @@ export const action = async ({ request }) => {
 };
 
 export default function Index() {
+  const data = useLoaderData();
   const fetcher = useFetcher();
   const shopify = useAppBridge();
   const isLoading =
     ["loading", "submitting"].includes(fetcher.state) &&
     fetcher.formMethod === "POST";
+
+  console.log("=== DEBUG: Component Data ===", data);
 
   useEffect(() => {
     if (fetcher.data?.product?.id) {
@@ -90,10 +154,28 @@ export default function Index() {
   const generateProduct = () => fetcher.submit({}, { method: "POST" });
 
   return (
-    <s-page heading="Shopify app template">
+    <s-page heading="AI Receptionist Dashboard">
       <s-button slot="primary-action" onClick={generateProduct}>
         Generate a product
       </s-button>
+
+      {/* Show debug info in dev mode */}
+      {process.env.NODE_ENV === 'development' && (
+        <s-banner tone="info">
+          <p><strong>Debug Info:</strong></p>
+          <p>Shop: {data.shop}</p>
+          <p>Is Configured: {data.isConfigured ? 'Yes' : 'No'}</p>
+          <p>Has Phone Number: {data.hasPhoneNumber ? 'Yes' : 'No'}</p>
+          <p>Assistant ID: {data.vapiConfig?.assistantId || 'None'}</p>
+          <p>Phone Number: {data.vapiConfig?.phoneNumber || 'None'}</p>
+        </s-banner>
+      )}
+      
+      {!data.isConfigured && (
+        <s-banner tone="warning">
+          Your AI assistant is not configured yet. Please complete setup first.
+        </s-banner>
+      )}
 
       <s-section heading="Congrats on creating a new Shopify app 🎉">
         <s-paragraph>

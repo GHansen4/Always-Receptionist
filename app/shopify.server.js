@@ -20,6 +20,7 @@ const shopify = shopifyApp({
   
   hooks: {
     afterAuth: async ({ session, admin }) => {
+      console.log("=== AFTERAUTH HOOK RUNNING ===");
       console.log(`Shop ${session.shop} authenticated successfully`);
 
       try {
