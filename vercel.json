@@ -1,7 +1,15 @@
 {
-    "buildCommand": "npm run build",
-    "devCommand": "npm run dev",
-    "installCommand": "npm install && npx prisma generate",
-    "framework": "react-router",
-    "outputDirectory": "build/client"
+  "version": 2,
+  "buildCommand": "npm run build",
+  "installCommand": "npm install && npx prisma generate",
+  "outputDirectory": "build/client",
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/build/server/index.js" }
+  ],
+  "functions": {
+    "build/server/index.js": {
+      "includeFiles": "node_modules/**"
+    }
   }
+}
