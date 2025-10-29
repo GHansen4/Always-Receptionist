@@ -1,16 +1,4 @@
 {
   "buildCommand": "npm run build",
-  "installCommand": "npm install && npx prisma generate",
-  "outputDirectory": "build/client",
-  "functions": {
-    "build/server/index.js": {
-      "runtime": "nodejs20.x"
-    }
-  },
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/build/server/index.js"
-    }
-  ]
+  "installCommand": "npm install && npx prisma generate"
 }
