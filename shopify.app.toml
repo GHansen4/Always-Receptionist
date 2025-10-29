@@ -1,6 +1,6 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "5c4caef303b1976903184f8de009261c"
+client_id = "a0563782e38f84b7ce2ef0d2f5b87ed5"
 name = "ALWAYS Receptionist"
 application_url = "https://always-receptionist.vercel.app"
 embedded = true
