@@ -1,6 +1,5 @@
 import { redirect, Form, useLoaderData } from "react-router";
 import { login } from "../shopify.server";
-import styles from "./_index.module.css";
 
 export const loader = async ({ request }) => {
   const url = new URL(request.url);
@@ -16,25 +15,25 @@ export default function App() {
   const { showForm } = useLoaderData();
 
   return (
-    <div className={styles.index}>
-      <div className={styles.content}>
-        <h1 className={styles.heading}>A short heading about [your app]</h1>
-        <p className={styles.text}>
+    <div>
+      <div>
+        <h1>A short heading about [your app]</h1>
+        <p>
           A tagline about [your app] that describes your value proposition.
         </p>
         {showForm && (
-          <Form className={styles.form} method="post" action="/auth/login">
-            <label className={styles.label}>
+          <Form method="post" action="/auth/login">
+            <label>
               <span>Shop domain</span>
-              <input className={styles.input} type="text" name="shop" />
+              <input type="text" name="shop" />
               <span>e.g: my-shop-domain.myshopify.com</span>
             </label>
-            <button className={styles.button} type="submit">
+            <button type="submit">
               Log in
             </button>
           </Form>
         )}
-        <ul className={styles.list}>
+        <ul>
           <li>
             <strong>Product feature</strong>. Some detail about your feature and
             its benefit to your customer.

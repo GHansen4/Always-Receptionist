@@ -1,22 +1,26 @@
 import { AppProvider } from "@shopify/shopify-app-react-router/react";
 import { useState } from "react";
 import { Form, useActionData, useLoaderData } from "react-router";
-import { login } from "../shopify.server";
+import { login, LoginErrorType } from "../shopify.server";
+
+// Inline the error handler - no separate file needed
+function loginErrorMessage(loginErrors) {
+  if (loginErrors?.shop === LoginErrorType.MissingShop) {
+    return { shop: "Please enter your shop domain to log in" };
+  } else if (loginErrors?.shop === LoginErrorType.InvalidShop) {
+    return { shop: "Please enter a valid shop domain to log in" };
+  }
+  return {};
+}
 
 export const loader = async ({ request }) => {
-  const { loginErrorMessage } = await import("./auth.login.error.server");
   const errors = loginErrorMessage(await login(request));
-
   return { errors };
 };
 
 export const action = async ({ request }) => {
-  const { loginErrorMessage } = await import("./auth.login.error.server");
   const errors = loginErrorMessage(await login(request));
-
-  return {
-    errors,
-  };
+  return { errors };
 };
 
 export default function Auth() {
@@ -46,4 +50,3 @@ export default function Auth() {
     </AppProvider>
   );
 }
-
