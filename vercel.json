@@ -1,5 +1,4 @@
 {
-    "buildCommand": "npm run build && npx @vercel/react-router build",
-    "outputDirectory": ".vercel/output"
+    "buildCommand": "npm run build"
   }
   
