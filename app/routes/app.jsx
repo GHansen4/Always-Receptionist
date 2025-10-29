@@ -4,9 +4,33 @@ import { AppProvider } from "@shopify/shopify-app-react-router/react";
 import { authenticate } from "../shopify.server";
 
 export const loader = async ({ request }) => {
-  await authenticate.admin(request);
-
-  return { apiKey: process.env.SHOPIFY_API_KEY || "" };
+  console.log("\n=== APP ROUTE LOADER ===");
+  console.log("URL:", request.url);
+  console.log("Method:", request.method);
+  console.log("Headers:", Object.fromEntries(request.headers.entries()));
+  
+  try {
+    console.log("🔐 Attempting authentication...");
+    await authenticate.admin(request);
+    console.log("✅ Authentication successful!");
+    
+    const apiKey = process.env.SHOPIFY_API_KEY || "";
+    console.log("API Key present:", !!apiKey);
+    console.log("========================\n");
+    
+    return { apiKey };
+  } catch (error) {
+    console.error("\n❌ AUTHENTICATION FAILED");
+    console.error("Error type:", error.constructor.name);
+    console.error("Error message:", error.message);
+    console.error("Status:", error.status || error.statusCode || "unknown");
+    console.error("Response:", error.response || "none");
+    console.error("Stack:", error.stack);
+    console.error("========================\n");
+    
+    // Re-throw the error so React Router can handle it properly
+    throw error;
+  }
 };
 
 export default function App() {

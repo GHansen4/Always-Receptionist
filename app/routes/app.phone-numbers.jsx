@@ -4,8 +4,16 @@ import prisma from "../db.server";
 
 // Loader: Get current phone number status
 export async function loader({ request }) {
+  console.log("\n=== PHONE NUMBERS ROUTE LOADER ===");
+  console.log("URL:", request.url);
+  console.log("Method:", request.method);
+  
   try {
+    console.log("🔐 Attempting authentication...");
     const { session } = await authenticate.admin(request);
+    console.log("✅ Authentication successful!");
+    console.log("Session ID:", session.id);
+    console.log("Shop:", session.shop);
 
     const vapiConfig = await prisma.vapiConfig.findUnique({
       where: { shop: session.shop },
@@ -22,18 +30,38 @@ export async function loader({ request }) {
       shop: session.shop,
     };
   } catch (error) {
-    console.error("Error loading phone numbers:", error);
+    console.error("\n❌ PHONE NUMBERS LOADER ERROR");
+    console.error("Error type:", error.constructor.name);
+    console.error("Error message:", error.message);
+    console.error("Status:", error.status || error.statusCode || "unknown");
+    console.error("Stack:", error.stack);
+    
+    // Re-throw authentication errors
+    if (error.status === 401 || error.statusCode === 401 || error.message?.includes('Unauthorized')) {
+      console.error("Authentication error detected - re-throwing for React Router");
+      throw error;
+    }
+    
     return { error: error.message };
   }
 }
 
 // Action: Provision or release phone number
 export async function action({ request }) {
-  const { session } = await authenticate.admin(request);
-  const formData = await request.formData();
-  const action = formData.get("action");
-
+  console.log("\n=== PHONE NUMBERS ROUTE ACTION ===");
+  console.log("URL:", request.url);
+  console.log("Method:", request.method);
+  
   try {
+    console.log("🔐 Attempting authentication...");
+    const { session } = await authenticate.admin(request);
+    console.log("✅ Authentication successful!");
+    console.log("Session ID:", session.id);
+    console.log("Shop:", session.shop);
+    
+    const formData = await request.formData();
+    const action = formData.get("action");
+
     if (action === "provision") {
       // Call VAPI API to buy a phone number
       const vapiResponse = await fetch("https://api.vapi.ai/phone-number", {
@@ -102,7 +130,18 @@ export async function action({ request }) {
     return { success: false, error: "Invalid action" };
     
   } catch (error) {
-    console.error("Phone number action error:", error);
+    console.error("\n❌ PHONE NUMBERS ACTION ERROR");
+    console.error("Error type:", error.constructor.name);
+    console.error("Error message:", error.message);
+    console.error("Status:", error.status || error.statusCode || "unknown");
+    console.error("Stack:", error.stack);
+    
+    // Re-throw authentication errors
+    if (error.status === 401 || error.statusCode === 401 || error.message?.includes('Unauthorized')) {
+      console.error("Authentication error detected - re-throwing for React Router");
+      throw error;
+    }
+    
     return { 
       success: false, 
       error: error.message 

@@ -6,13 +6,23 @@ import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
 
 export const loader = async ({ request }) => {
-  const { session } = await authenticate.admin(request);
-  const shop = session.shop;
-  
-  console.log("=== DEBUG: Index Route Loader ===");
-  console.log("Shop:", shop);
+  console.log("\n=== INDEX ROUTE LOADER ===");
+  console.log("URL:", request.url);
+  console.log("Method:", request.method);
   
   try {
+    console.log("🔐 Attempting authentication...");
+    const { session } = await authenticate.admin(request);
+    console.log("✅ Authentication successful!");
+    console.log("Session ID:", session.id);
+    console.log("Shop:", session.shop);
+    console.log("Access Token present:", !!session.accessToken);
+    
+    const shop = session.shop;
+    
+    console.log("=== DEBUG: Index Route Loader ===");
+    console.log("Shop:", shop);
+  
     // Check what's in the database
     const vapiConfig = await prisma.vapiConfig.findUnique({
       where: { shop }
@@ -56,21 +66,38 @@ export const loader = async ({ request }) => {
     };
     
   } catch (error) {
-    console.error("Error in loader:", error);
+    console.error("\n❌ INDEX ROUTE LOADER ERROR");
+    console.error("Error type:", error.constructor.name);
+    console.error("Error message:", error.message);
+    console.error("Status:", error.status || error.statusCode || "unknown");
+    console.error("Stack:", error.stack);
+    
+    // If it's an authentication error, re-throw it so React Router can handle it
+    if (error.status === 401 || error.statusCode === 401 || error.message?.includes('Unauthorized')) {
+      console.error("Authentication error detected - re-throwing for React Router");
+      throw error;
+    }
+    
+    // For other errors, return error state
     return {
-      shop,
+      shop: null,
       vapiConfig: null,
       isConfigured: false,
       hasPhoneNumber: false,
       error: error.message
     };
-  } finally {
-    await prisma.$disconnect();
   }
 };
 
 export const action = async ({ request }) => {
-  const { admin } = await authenticate.admin(request);
+  console.log("\n=== INDEX ROUTE ACTION ===");
+  console.log("URL:", request.url);
+  console.log("Method:", request.method);
+  
+  try {
+    console.log("🔐 Attempting authentication...");
+    const { admin } = await authenticate.admin(request);
+    console.log("✅ Authentication successful!");
   const color = ["Red", "Orange", "Yellow", "Green"][
     Math.floor(Math.random() * 4)
   ];
@@ -126,12 +153,28 @@ export const action = async ({ request }) => {
       },
     },
   );
-  const variantResponseJson = await variantResponse.json();
+    const variantResponseJson = await variantResponse.json();
 
-  return {
-    product: responseJson.data.productCreate.product,
-    variant: variantResponseJson.data.productVariantsBulkUpdate.productVariants,
-  };
+    return {
+      product: responseJson.data.productCreate.product,
+      variant: variantResponseJson.data.productVariantsBulkUpdate.productVariants,
+    };
+  } catch (error) {
+    console.error("\n❌ INDEX ROUTE ACTION ERROR");
+    console.error("Error type:", error.constructor.name);
+    console.error("Error message:", error.message);
+    console.error("Status:", error.status || error.statusCode || "unknown");
+    console.error("Stack:", error.stack);
+    
+    // Re-throw authentication errors
+    if (error.status === 401 || error.statusCode === 401 || error.message?.includes('Unauthorized')) {
+      console.error("Authentication error detected - re-throwing for React Router");
+      throw error;
+    }
+    
+    // For other errors, throw them as well so React Router can handle them
+    throw error;
+  }
 };
 
 export default function Index() {
