@@ -6,24 +6,15 @@ export const loader = async ({ request }) => {
   console.log("URL:", request.url);
   console.log("Method:", request.method);
   
-  try {
-    console.log("🔐 Attempting authentication...");
-    await authenticate.admin(request);
-    console.log("✅ Authentication successful!");
-    console.log("========================\n");
-    
-    return null;
-  } catch (error) {
-    console.error("\n❌ AUTH ROUTE AUTHENTICATION FAILED");
-    console.error("Error type:", error.constructor.name);
-    console.error("Error message:", error.message);
-    console.error("Status:", error.status || error.statusCode || "unknown");
-    console.error("Stack:", error.stack);
-    console.error("========================\n");
-    
-    // Re-throw the error so React Router can handle it properly
-    throw error;
-  }
+  console.log("🔐 Attempting authentication...");
+  const response = await authenticate.admin(request);
+  console.log("✅ Authentication response received");
+  console.log("Response type:", response?.constructor?.name);
+  console.log("========================\n");
+  
+  // If authenticate.admin returns a Response, return it
+  // Otherwise return null
+  return response || null;
 };
 
 export const headers = (headersArgs) => {
