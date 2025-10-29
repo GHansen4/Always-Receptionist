@@ -1,4 +1,5 @@
 {
-  "buildCommand": "npm run build",
-  "installCommand": "npm install && npx prisma generate"
-}
+    "buildCommand": "npm run build",
+    "installCommand": "npm install && npx prisma generate",
+    "framework": "react-router"
+  }
