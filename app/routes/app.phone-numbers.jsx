@@ -354,7 +354,7 @@ export default function PhoneNumbers() {
   return (
     <>
       <style>{`
-        /* Proper spacing for form fields */
+        /* Style for native HTML form inputs only - DO NOT style Polaris web components */
         .assistant-form-field {
           margin-bottom: 20px;
         }
@@ -364,7 +364,6 @@ export default function PhoneNumbers() {
           margin-bottom: 8px;
         }
 
-        /* Style form inputs to match Shopify admin */
         .assistant-form-field input,
         .assistant-form-field select,
         .assistant-form-field textarea {
@@ -408,28 +407,10 @@ export default function PhoneNumbers() {
           color: #6d7175;
         }
 
-        /* Ensure proper spacing in button groups */
         .button-group {
           display: flex;
           gap: 12px;
           margin-top: 24px;
-        }
-
-        /* Card spacing - add margin between cards */
-        s-card {
-          display: block;
-          margin-bottom: 20px;
-        }
-
-        /* Ensure block stacks have proper spacing */
-        s-block-stack {
-          display: block;
-        }
-
-        /* Add spacing to text elements */
-        s-text {
-          display: block;
-          margin-bottom: 4px;
         }
       `}</style>
       <s-page heading="Phone Numbers">
