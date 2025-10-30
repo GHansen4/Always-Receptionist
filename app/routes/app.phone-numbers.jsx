@@ -352,7 +352,87 @@ export default function PhoneNumbers() {
   const shopName = shop?.replace('.myshopify.com', '') || '';
 
   return (
-    <s-page heading="Phone Numbers">
+    <>
+      <style>{`
+        /* Proper spacing for form fields */
+        .assistant-form-field {
+          margin-bottom: 20px;
+        }
+
+        .assistant-form-field label {
+          display: block;
+          margin-bottom: 8px;
+        }
+
+        /* Style form inputs to match Shopify admin */
+        .assistant-form-field input,
+        .assistant-form-field select,
+        .assistant-form-field textarea {
+          width: 100%;
+          padding: 10px 12px;
+          border: 1px solid #c9cccf;
+          border-radius: 8px;
+          font-size: 14px;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+          line-height: 1.5;
+          background-color: #ffffff;
+          transition: border-color 0.2s ease;
+          box-sizing: border-box;
+        }
+
+        .assistant-form-field input:focus,
+        .assistant-form-field select:focus,
+        .assistant-form-field textarea:focus {
+          outline: none;
+          border-color: #005bd3;
+          box-shadow: 0 0 0 1px #005bd3;
+        }
+
+        .assistant-form-field input:disabled,
+        .assistant-form-field select:disabled,
+        .assistant-form-field textarea:disabled {
+          background-color: #f6f6f7;
+          color: #8c9196;
+          cursor: not-allowed;
+        }
+
+        .assistant-form-field textarea {
+          resize: vertical;
+          min-height: 100px;
+        }
+
+        .assistant-form-field small {
+          display: block;
+          margin-top: 6px;
+          font-size: 13px;
+          color: #6d7175;
+        }
+
+        /* Ensure proper spacing in button groups */
+        .button-group {
+          display: flex;
+          gap: 12px;
+          margin-top: 24px;
+        }
+
+        /* Card spacing - add margin between cards */
+        s-card {
+          display: block;
+          margin-bottom: 20px;
+        }
+
+        /* Ensure block stacks have proper spacing */
+        s-block-stack {
+          display: block;
+        }
+
+        /* Add spacing to text elements */
+        s-text {
+          display: block;
+          margin-bottom: 4px;
+        }
+      `}</style>
+      <s-page heading="Phone Numbers">
       <s-block-stack gap="500">
         {actionData?.success && (
           <s-banner tone="success">
@@ -656,6 +736,7 @@ The store you're representing is: ${shop}`}
           </s-block-stack>
         </s-card>
       </s-block-stack>
-    </s-page>
+      </s-page>
+    </>
   );
 }
