@@ -138,6 +138,28 @@ The store you're representing is: ${session.shop}`;
           model: model,
           temperature: temperature,
           systemPrompt: systemPrompt,
+          tools: [
+            {
+              type: "function",
+              function: {
+                name: "get_products",
+                description: "Get products from the store. Use this to answer questions about products, inventory, pricing, and availability.",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    query: {
+                      type: "string",
+                      description: "Search query to filter products (optional). Example: 'red shoes', 'laptop', 'on sale'"
+                    },
+                    limit: {
+                      type: "number",
+                      description: "Maximum number of products to return (default: 10, max: 50)"
+                    }
+                  }
+                }
+              }
+            }
+          ]
         },
         voice: {
           provider: voiceProvider,
