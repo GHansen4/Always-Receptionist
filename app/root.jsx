@@ -12,6 +12,10 @@ export default function App() {
           rel="stylesheet"
           href="https://cdn.shopify.com/static/fonts/inter/v4/styles.css"
         />
+        <script
+          type="module"
+          src="https://cdn.shopify.com/shopifycloud/app-home-elements/3.0.0/app-home-elements.js"
+        />
         <Meta />
         <Links />
       </head>
