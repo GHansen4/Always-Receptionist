@@ -24,9 +24,32 @@ export async function loader({ request }) {
       }
     });
 
+    let assistant = null;
+
+    // Fetch assistant details from VAPI if we have an assistantId
+    if (vapiConfig?.assistantId) {
+      try {
+        const response = await fetch(`https://api.vapi.ai/assistant/${vapiConfig.assistantId}`, {
+          headers: {
+            'Authorization': `Bearer ${process.env.VAPI_PRIVATE_KEY}`
+          }
+        });
+
+        if (response.ok) {
+          assistant = await response.json();
+          console.log("✅ Fetched assistant:", assistant.name);
+        } else {
+          console.log("⚠️ Could not fetch assistant:", response.status);
+        }
+      } catch (vapiError) {
+        console.log("⚠️ Error fetching assistant:", vapiError.message);
+      }
+    }
+
     return {
       phoneNumber: vapiConfig?.phoneNumber || null,
       hasAssistant: !!vapiConfig?.assistantId,
+      assistant,
       shop: session.shop,
     };
   } catch (error) {
@@ -151,7 +174,7 @@ export async function action({ request }) {
 
 // Component using Polaris web components
 export default function PhoneNumbers() {
-  const { phoneNumber, hasAssistant } = useLoaderData();
+  const { phoneNumber, hasAssistant, assistant } = useLoaderData();
   const submit = useSubmit();
   const navigation = useNavigation();
   const isLoading = navigation.state !== "idle";
@@ -178,6 +201,55 @@ export default function PhoneNumbers() {
             <s-banner tone="warning">
               <p>Your AI assistant is not configured yet. Please complete setup first.</p>
             </s-banner>
+          </s-layout-section>
+        )}
+
+        {assistant && (
+          <s-layout-section>
+            <s-card>
+              <s-block-stack gap="400">
+                <s-text variant="headingMd" as="h2">
+                  AI Assistant Configuration
+                </s-text>
+
+                <s-block-stack gap="200">
+                  <s-inline-stack gap="200" block-align="center">
+                    <s-text variant="bodyMd" as="span" tone="subdued">Name:</s-text>
+                    <s-text variant="bodyMd" as="span">{assistant.name}</s-text>
+                  </s-inline-stack>
+
+                  <s-inline-stack gap="200" block-align="center">
+                    <s-text variant="bodyMd" as="span" tone="subdued">Assistant ID:</s-text>
+                    <s-text variant="bodySm" as="span" style={{fontFamily: 'monospace'}}>{assistant.id}</s-text>
+                  </s-inline-stack>
+
+                  {assistant.voice && (
+                    <>
+                      <s-inline-stack gap="200" block-align="center">
+                        <s-text variant="bodyMd" as="span" tone="subdued">Voice Provider:</s-text>
+                        <s-text variant="bodyMd" as="span">{assistant.voice.provider}</s-text>
+                      </s-inline-stack>
+
+                      <s-inline-stack gap="200" block-align="center">
+                        <s-text variant="bodyMd" as="span" tone="subdued">Voice ID:</s-text>
+                        <s-text variant="bodyMd" as="span">{assistant.voice.voiceId}</s-text>
+                      </s-inline-stack>
+                    </>
+                  )}
+
+                  {assistant.model && (
+                    <s-inline-stack gap="200" block-align="center">
+                      <s-text variant="bodyMd" as="span" tone="subdued">Model:</s-text>
+                      <s-text variant="bodyMd" as="span">{assistant.model.model}</s-text>
+                    </s-inline-stack>
+                  )}
+                </s-block-stack>
+
+                <s-banner tone="success">
+                  <p>Your AI assistant is active and ready to handle calls!</p>
+                </s-banner>
+              </s-block-stack>
+            </s-card>
           </s-layout-section>
         )}
 
