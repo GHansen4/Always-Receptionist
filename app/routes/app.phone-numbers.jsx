@@ -476,117 +476,73 @@ export default function PhoneNumbers() {
                 </s-block-stack>
               ) : (
                 <form onSubmit={handleCreateAssistant}>
-                  <div className="assistant-form-field">
-                    <label htmlFor="assistantName">
-                      <s-text variant="bodyMd" as="span">Assistant Name</s-text>
-                    </label>
-                    <input
-                      id="assistantName"
+                  <s-block-stack gap="400">
+                    <s-text-field
+                      label="Assistant Name"
                       name="assistantName"
-                      type="text"
-                      defaultValue={`${shopName} Receptionist`}
-                      placeholder="My Store Receptionist"
-                      maxLength="40"
+                      value={`${shopName} Receptionist`}
+                      max-length="40"
+                      help-text="Maximum 40 characters"
                     />
-                    <small>Maximum 40 characters</small>
-                  </div>
 
-                  <div className="assistant-form-field">
-                    <label htmlFor="voiceProvider">
-                      <s-text variant="bodyMd" as="span">Voice Provider</s-text>
-                    </label>
-                    <select
-                      id="voiceProvider"
+                    <s-select
+                      label="Voice Provider"
                       name="voiceProvider"
-                      defaultValue="openai"
+                      value="openai"
                     >
                       <option value="openai">OpenAI</option>
                       <option value="11labs">ElevenLabs</option>
                       <option value="playht">PlayHT</option>
-                    </select>
-                  </div>
+                    </s-select>
 
-                  <div className="assistant-form-field">
-                    <label htmlFor="voiceId">
-                      <s-text variant="bodyMd" as="span">Voice ID</s-text>
-                    </label>
-                    <input
-                      id="voiceId"
+                    <s-text-field
+                      label="Voice ID"
                       name="voiceId"
-                      type="text"
-                      defaultValue="echo"
-                      placeholder="echo, ash, alloy, etc."
+                      value="echo"
+                      help-text="For OpenAI: alloy, echo, fable, onyx, nova, shimmer"
                     />
-                    <small>For OpenAI: alloy, echo, fable, onyx, nova, shimmer</small>
-                  </div>
 
-                  <div className="assistant-form-field">
-                    <label htmlFor="model">
-                      <s-text variant="bodyMd" as="span">AI Model</s-text>
-                    </label>
-                    <select
-                      id="model"
+                    <s-select
+                      label="AI Model"
                       name="model"
-                      defaultValue="gpt-4o"
+                      value="gpt-4o"
                     >
                       <option value="gpt-4o">GPT-4o (Recommended)</option>
                       <option value="gpt-4o-mini">GPT-4o Mini (Faster, cheaper)</option>
                       <option value="gpt-4-turbo">GPT-4 Turbo</option>
                       <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Cheapest)</option>
-                    </select>
-                  </div>
+                    </s-select>
 
-                  <div className="assistant-form-field">
-                    <label htmlFor="temperature">
-                      <s-text variant="bodyMd" as="span">Temperature (Creativity)</s-text>
-                    </label>
-                    <input
-                      id="temperature"
+                    <s-text-field
+                      label="Temperature (Creativity)"
                       name="temperature"
                       type="number"
+                      value="0.7"
                       min="0"
                       max="1"
                       step="0.1"
-                      defaultValue="0.7"
+                      help-text="0 = More focused, 1 = More creative"
                     />
-                    <small>0 = More focused, 1 = More creative</small>
-                  </div>
 
-                  <div className="assistant-form-field">
-                    <label htmlFor="firstMessage">
-                      <s-text variant="bodyMd" as="span">First Message</s-text>
-                    </label>
-                    <input
-                      id="firstMessage"
+                    <s-text-field
+                      label="First Message"
                       name="firstMessage"
-                      type="text"
-                      defaultValue="Hi! Thanks for calling. How can I help you today?"
+                      value="Hi! Thanks for calling. How can I help you today?"
+                      help-text="What the assistant says when answering the call"
                     />
-                    <small>What the assistant says when answering the call</small>
-                  </div>
 
-                  <div className="assistant-form-field">
-                    <label htmlFor="endCallMessage">
-                      <s-text variant="bodyMd" as="span">End Call Message</s-text>
-                    </label>
-                    <input
-                      id="endCallMessage"
+                    <s-text-field
+                      label="End Call Message"
                       name="endCallMessage"
-                      type="text"
-                      defaultValue="Thanks for calling! Have a great day!"
+                      value="Thanks for calling! Have a great day!"
+                      help-text="What the assistant says before hanging up"
                     />
-                    <small>What the assistant says before hanging up</small>
-                  </div>
 
-                  <div className="assistant-form-field">
-                    <label htmlFor="systemPrompt">
-                      <s-text variant="bodyMd" as="span">System Prompt (Instructions)</s-text>
-                    </label>
-                    <textarea
-                      id="systemPrompt"
+                    <s-text-field
+                      label="System Prompt (Instructions)"
                       name="systemPrompt"
-                      rows="8"
-                      defaultValue={`You are a friendly AI receptionist for an online store.
+                      multiline="8"
+                      value={`You are a friendly AI receptionist for an online store.
 
 Your role:
 - Answer questions about products and inventory
@@ -599,27 +555,27 @@ Important rules:
 - If you don't know something, be honest and offer to transfer to a human
 
 The store you're representing is: ${shop}`}
+                      help-text="Instructions that define how the assistant behaves"
                     />
-                    <small>Instructions that define how the assistant behaves</small>
-                  </div>
 
-                  <div className="button-group">
-                    <s-button
-                      type="submit"
-                      variant="primary"
-                      loading={isLoading}
-                      disabled={isLoading}
-                    >
-                      Create Assistant
-                    </s-button>
-                    <s-button
-                      type="button"
-                      onClick={() => setShowAssistantForm(false)}
-                      disabled={isLoading}
-                    >
-                      Cancel
-                    </s-button>
-                  </div>
+                    <s-inline-stack gap="200">
+                      <s-button
+                        type="submit"
+                        variant="primary"
+                        loading={isLoading}
+                        disabled={isLoading}
+                      >
+                        Create Assistant
+                      </s-button>
+                      <s-button
+                        type="button"
+                        onClick={() => setShowAssistantForm(false)}
+                        disabled={isLoading}
+                      >
+                        Cancel
+                      </s-button>
+                    </s-inline-stack>
+                  </s-block-stack>
                 </form>
               )}
             </s-block-stack>
@@ -641,15 +597,15 @@ The store you're representing is: ${shop}`}
               <s-block-stack gap="300">
                 <s-block-stack gap="100">
                   <s-text variant="bodySm" tone="subdued">Assistant Name</s-text>
-                  <s-text variant="bodyMd" as="p">{assistant.name}</s-text>
+                  <s-text variant="bodyMd" as="p">{assistant?.name}</s-text>
                 </s-block-stack>
 
                 <s-block-stack gap="100">
                   <s-text variant="bodySm" tone="subdued">Assistant ID</s-text>
-                  <s-text variant="bodySm" as="p">{assistant.id}</s-text>
+                  <s-text variant="bodySm" as="p">{assistant?.id}</s-text>
                 </s-block-stack>
 
-                {assistant.voice && (
+                {assistant?.voice && (
                   <>
                     <s-block-stack gap="100">
                       <s-text variant="bodySm" tone="subdued">Voice Provider</s-text>
@@ -663,7 +619,7 @@ The store you're representing is: ${shop}`}
                   </>
                 )}
 
-                {assistant.model && (
+                {assistant?.model && (
                   <s-block-stack gap="100">
                     <s-text variant="bodySm" tone="subdued">AI Model</s-text>
                     <s-text variant="bodyMd" as="p">{assistant.model.model}</s-text>
