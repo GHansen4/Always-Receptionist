@@ -11,10 +11,6 @@ export default function App() {
           rel="stylesheet"
           href="https://cdn.shopify.com/static/fonts/inter/v4/styles.css"
         />
-        <script
-          type="module"
-          src="https://cdn.shopify.com/shopifycloud/app-home/polaris-web-components/2025.10/polaris.mjs"
-        ></script>
         <Meta />
         <Links />
       </head>
