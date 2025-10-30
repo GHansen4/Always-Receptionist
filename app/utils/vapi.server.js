@@ -21,8 +21,11 @@ export async function createVapiAssistant(shop, vapiSignature) {
     throw new Error("VAPI_PRIVATE_KEY is not set in environment variables");
   }
 
+  // Extract shop name without domain to keep name under 40 chars
+  const shopName = shop.replace('.myshopify.com', '');
+
   const payload = {
-    name: `${shop} - AI Receptionist`,
+    name: `${shopName} Receptionist`,
     model: {
       provider: "openai",
       model: "gpt-4o",
@@ -42,7 +45,7 @@ Important rules:
 The store you're representing is: ${shop}`,
     },
     voice: {
-      provider: "elevenlabs",
+      provider: "11labs",
       voiceId: "rachel",
     },
     firstMessage: "Hi! Thanks for calling. How can I help you today?",
