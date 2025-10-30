@@ -16,9 +16,21 @@ if (!connectionString) {
 
 console.log('✅ Creating standard Prisma client for Supabase...');
 
-// Standard Prisma client - no adapters needed for Supabase
+// Standard Prisma client with connection pooling settings for serverless
 const prisma = global.prisma || new PrismaClient({
-  log: process.env.NODE_ENV === 'production' ? ['error'] : ['query', 'error', 'warn']
+  datasources: {
+    db: {
+      url: connectionString,
+    },
+  },
+  log: process.env.NODE_ENV === 'production' ? ['error'] : ['query', 'error', 'warn'],
+  // Disable prepared statements for pgBouncer compatibility
+  // This prevents "prepared statement already exists" errors
+  __internal: {
+    engine: {
+      enablePreparedStatements: false,
+    },
+  },
 });
 
 if (process.env.NODE_ENV !== 'production') {
