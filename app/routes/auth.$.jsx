@@ -17,31 +17,52 @@ export const loader = async ({ request }) => {
       console.log(`Auth attempt ${attempt}/${maxRetries}...`);
       const response = await authenticate.admin(request);
       
-      console.log("✅ Authentication successful!");
+      console.log("✅ Authentication returned successfully!");
       console.log("Response type:", response?.constructor?.name);
-      console.log("Response status:", response?.status);
       console.log("========================\n");
       
       return response || null;
       
     } catch (error) {
-      // Check if it's a database connection error
-      const isDatabaseError = 
-        error.message?.includes("Can't reach database") ||
-        error.message?.includes("connection pool") ||
-        error.message?.includes("ETIMEDOUT") ||
-        error.message?.includes("Connection timeout") ||
-        error.message?.includes("Timed out fetching");
-      
       console.log(`❌ Auth attempt ${attempt} failed`);
       console.log("Error type:", error.constructor.name);
       console.log("Error message:", error.message);
-      console.log("Is database error?", isDatabaseError);
       
-      // If it's not a database error, throw immediately
-      if (!isDatabaseError) {
-        console.log("→ Not a database error, throwing immediately");
-        throw error;
+      // If it's a Response object, check the status
+      if (error instanceof Response) {
+        console.log("Response status:", error.status);
+        console.log("Response headers:", Object.fromEntries(error.headers.entries()));
+        
+        // If it's a successful response (200-299) or redirect (300-399), return it
+        if (error.ok || (error.status >= 300 && error.status < 400)) {
+          console.log("✅ Response is OK or redirect, returning it");
+          return error;
+        }
+        
+        // If it's a 401 with retry header, it might be a database issue
+        const retryHeader = error.headers.get('X-Shopify-Retry-Invalid-Session-Request');
+        if (error.status === 401 && retryHeader) {
+          console.log("→ 401 with retry header - likely database connection issue");
+          // Continue to retry logic below
+        } else {
+          console.log("→ Response error is not database-related, throwing");
+          throw error;
+        }
+      } else {
+        // Check if it's a database connection error
+        const isDatabaseError = 
+          error.message?.includes("Can't reach database") ||
+          error.message?.includes("connection pool") ||
+          error.message?.includes("ETIMEDOUT") ||
+          error.message?.includes("Connection timeout") ||
+          error.message?.includes("Timed out fetching");
+        
+        console.log("Is database error?", isDatabaseError);
+        
+        if (!isDatabaseError) {
+          console.log("→ Not a database error, throwing immediately");
+          throw error;
+        }
       }
       
       // Store the error and retry if we have attempts left
