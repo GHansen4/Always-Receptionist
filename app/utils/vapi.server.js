@@ -45,8 +45,8 @@ Important rules:
 The store you're representing is: ${shop}`,
     },
     voice: {
-      provider: "11labs",
-      voiceId: "rachel",
+      provider: "openai",
+      voiceId: "echo",
     },
     firstMessage: "Hi! Thanks for calling. How can I help you today?",
     endCallMessage: "Thanks for calling! Have a great day!",
