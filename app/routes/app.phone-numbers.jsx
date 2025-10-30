@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLoaderData, useSubmit, useNavigation, useActionData, ClientOnly } from "react-router";
+import { useLoaderData, useSubmit, useNavigation, useActionData } from "react-router";
 import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
 
@@ -352,8 +352,6 @@ export default function PhoneNumbers() {
   const shopName = shop?.replace('.myshopify.com', '') || '';
 
   return (
-    <ClientOnly fallback={<s-page heading="Phone Numbers"><s-spinner size="large" /></s-page>}>
-      {() => (
     <>
       <style>{`
         /* Style for native HTML form inputs only - DO NOT style Polaris web components */
@@ -721,7 +719,5 @@ The store you're representing is: ${shop}`}
       </s-block-stack>
       </s-page>
     </>
-      )}
-    </ClientOnly>
   );
 }
