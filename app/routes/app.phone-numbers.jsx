@@ -194,143 +194,162 @@ export default function PhoneNumbers() {
   };
 
   return (
-    <s-page title="Phone Numbers">
-      <s-layout>
+    <s-page heading="Phone Numbers">
+      <s-block-stack gap="500">
         {!hasAssistant && (
-          <s-layout-section>
-            <s-banner tone="warning">
-              <p>Your AI assistant is not configured yet. Please complete setup first.</p>
-            </s-banner>
-          </s-layout-section>
+          <s-banner tone="warning">
+            <p>Your AI assistant is not configured yet. Please complete setup first.</p>
+          </s-banner>
         )}
 
         {assistant && (
-          <s-layout-section>
-            <s-card>
-              <s-block-stack gap="400">
+          <s-card>
+            <s-block-stack gap="400">
+              <s-block-stack gap="200">
                 <s-text variant="headingMd" as="h2">
                   AI Assistant Configuration
                 </s-text>
-
-                <s-block-stack gap="200">
-                  <s-inline-stack gap="200" block-align="center">
-                    <s-text variant="bodyMd" as="span" tone="subdued">Name:</s-text>
-                    <s-text variant="bodyMd" as="span">{assistant.name}</s-text>
-                  </s-inline-stack>
-
-                  <s-inline-stack gap="200" block-align="center">
-                    <s-text variant="bodyMd" as="span" tone="subdued">Assistant ID:</s-text>
-                    <s-text variant="bodySm" as="span" style={{fontFamily: 'monospace'}}>{assistant.id}</s-text>
-                  </s-inline-stack>
-
-                  {assistant.voice && (
-                    <>
-                      <s-inline-stack gap="200" block-align="center">
-                        <s-text variant="bodyMd" as="span" tone="subdued">Voice Provider:</s-text>
-                        <s-text variant="bodyMd" as="span">{assistant.voice.provider}</s-text>
-                      </s-inline-stack>
-
-                      <s-inline-stack gap="200" block-align="center">
-                        <s-text variant="bodyMd" as="span" tone="subdued">Voice ID:</s-text>
-                        <s-text variant="bodyMd" as="span">{assistant.voice.voiceId}</s-text>
-                      </s-inline-stack>
-                    </>
-                  )}
-
-                  {assistant.model && (
-                    <s-inline-stack gap="200" block-align="center">
-                      <s-text variant="bodyMd" as="span" tone="subdued">Model:</s-text>
-                      <s-text variant="bodyMd" as="span">{assistant.model.model}</s-text>
-                    </s-inline-stack>
-                  )}
-                </s-block-stack>
-
-                <s-banner tone="success">
-                  <p>Your AI assistant is active and ready to handle calls!</p>
-                </s-banner>
+                <s-text tone="subdued">
+                  Your VAPI assistant is active and ready to handle customer calls
+                </s-text>
               </s-block-stack>
-            </s-card>
-          </s-layout-section>
-        )}
 
-        <s-layout-section>
-          <s-card>
-            <s-block-stack gap="400">
-              <s-text variant="headingMd" as="h2">
-                Active Phone Number
-              </s-text>
+              <s-divider />
 
-              {phoneNumber ? (
-                <s-block-stack gap="300">
-                  <s-inline-stack align="space-between" block-align="center">
-                    <s-block-stack gap="100">
-                      <s-text variant="headingLg" as="p">
-                        {phoneNumber}
-                      </s-text>
-                      <s-text variant="bodySm" tone="subdued">
-                        This number is active and receiving calls
+              <s-block-stack gap="300">
+                <s-inline-stack gap="400" wrap="false">
+                  <s-block-stack gap="100" style={{minWidth: '140px'}}>
+                    <s-text variant="bodySm" tone="subdued">Assistant Name</s-text>
+                    <s-text variant="bodyMd" as="p">{assistant.name}</s-text>
+                  </s-block-stack>
+
+                  <s-block-stack gap="100" style={{minWidth: '200px'}}>
+                    <s-text variant="bodySm" tone="subdued">Assistant ID</s-text>
+                    <s-text variant="bodySm" as="p" style={{fontFamily: 'monospace', wordBreak: 'break-all'}}>
+                      {assistant.id}
+                    </s-text>
+                  </s-block-stack>
+                </s-inline-stack>
+
+                {assistant.voice && (
+                  <s-inline-stack gap="400" wrap="false">
+                    <s-block-stack gap="100" style={{minWidth: '140px'}}>
+                      <s-text variant="bodySm" tone="subdued">Voice Provider</s-text>
+                      <s-text variant="bodyMd" as="p" style={{textTransform: 'capitalize'}}>
+                        {assistant.voice.provider}
                       </s-text>
                     </s-block-stack>
-                    
-                    <s-button
-                      tone="critical"
-                      onClick={handleRelease}
-                      loading={isLoading}
-                      disabled={isLoading}
-                    >
-                      Release Number
-                    </s-button>
-                  </s-inline-stack>
 
-                  <s-banner tone="info">
-                    <p>
-                      Test your AI receptionist by calling <strong>{phoneNumber}</strong>
-                    </p>
-                  </s-banner>
-                </s-block-stack>
-              ) : (
-                <s-block-stack gap="300">
-                  <s-text tone="subdued">
-                    No phone number provisioned yet. Get started by provisioning your first number.
-                  </s-text>
-                  
-                  <s-inline-stack>
-                    <s-button
-                      variant="primary"
-                      onClick={handleProvision}
-                      loading={isLoading}
-                      disabled={isLoading || !hasAssistant}
-                    >
-                      Provision Phone Number
-                    </s-button>
+                    <s-block-stack gap="100" style={{minWidth: '140px'}}>
+                      <s-text variant="bodySm" tone="subdued">Voice</s-text>
+                      <s-text variant="bodyMd" as="p" style={{textTransform: 'capitalize'}}>
+                        {assistant.voice.voiceId}
+                      </s-text>
+                    </s-block-stack>
                   </s-inline-stack>
+                )}
 
-                  {!hasAssistant && (
-                    <s-text variant="bodySm" tone="subdued">
-                      Complete assistant setup before provisioning a number
-                    </s-text>
-                  )}
-                </s-block-stack>
-              )}
+                {assistant.model && (
+                  <s-block-stack gap="100" style={{minWidth: '140px'}}>
+                    <s-text variant="bodySm" tone="subdued">AI Model</s-text>
+                    <s-text variant="bodyMd" as="p">{assistant.model.model}</s-text>
+                  </s-block-stack>
+                )}
+              </s-block-stack>
             </s-block-stack>
           </s-card>
-        </s-layout-section>
+        )}
 
-        <s-layout-section>
-          <s-card>
+        <s-card>
+          <s-block-stack gap="400">
             <s-block-stack gap="200">
               <s-text variant="headingMd" as="h2">
-                How it works
+                Phone Number
               </s-text>
-              <s-text tone="subdued">
-                When you provision a phone number, customers can call your AI receptionist 24/7. 
-                The AI can answer questions about products, check inventory, and help customers 
-                find what they're looking for.
+              {phoneNumber ? (
+                <s-text tone="subdued">
+                  Your provisioned phone number is active and ready to receive calls
+                </s-text>
+              ) : (
+                <s-text tone="subdued">
+                  Provision a phone number to allow customers to call your AI receptionist
+                </s-text>
+              )}
+            </s-block-stack>
+
+            <s-divider />
+
+            {phoneNumber ? (
+              <s-block-stack gap="400">
+                <s-inline-stack align="space-between" block-align="start" wrap="true">
+                  <s-block-stack gap="200">
+                    <s-text variant="headingLg" as="p">
+                      {phoneNumber}
+                    </s-text>
+                    <s-badge tone="success">Active</s-badge>
+                  </s-block-stack>
+
+                  <s-button
+                    tone="critical"
+                    onClick={handleRelease}
+                    loading={isLoading}
+                    disabled={isLoading}
+                  >
+                    Release Number
+                  </s-button>
+                </s-inline-stack>
+
+                <s-banner tone="info">
+                  <s-block-stack gap="100">
+                    <s-text variant="bodyMd" as="p">
+                      <strong>Test your AI receptionist</strong>
+                    </s-text>
+                    <s-text as="p">
+                      Call {phoneNumber} to speak with your AI assistant
+                    </s-text>
+                  </s-block-stack>
+                </s-banner>
+              </s-block-stack>
+            ) : (
+              <s-block-stack gap="300">
+                <s-button
+                  variant="primary"
+                  onClick={handleProvision}
+                  loading={isLoading}
+                  disabled={isLoading || !hasAssistant}
+                  size="large"
+                >
+                  Provision Phone Number
+                </s-button>
+
+                {!hasAssistant && (
+                  <s-text variant="bodySm" tone="subdued">
+                    You must configure your AI assistant before provisioning a phone number
+                  </s-text>
+                )}
+              </s-block-stack>
+            )}
+          </s-block-stack>
+        </s-card>
+
+        <s-card>
+          <s-block-stack gap="300">
+            <s-text variant="headingMd" as="h2">
+              How it works
+            </s-text>
+            <s-block-stack gap="200">
+              <s-text as="p">
+                When you provision a phone number, customers can call your AI receptionist 24/7
+                to get instant answers to their questions.
+              </s-text>
+              <s-text as="p" tone="subdued">
+                Your AI assistant has access to your product catalog and can help customers
+                find products, check availability, and answer common questions about your store.
               </s-text>
             </s-block-stack>
-          </s-card>
-        </s-layout-section>
-      </s-layout>
+          </s-block-stack>
+        </s-card>
+      </s-block-stack>
     </s-page>
   );
 }
