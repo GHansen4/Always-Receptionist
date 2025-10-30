@@ -3,8 +3,6 @@ import { shopifyApp } from "@shopify/shopify-app-react-router/server";
 import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
 import prisma from "./db.server";
 
-
-
 import { createVapiAssistant } from "./utils/vapi.server";
 import { randomBytes } from "crypto";
 
@@ -16,7 +14,11 @@ const shopify = shopifyApp({
   appUrl: process.env.SHOPIFY_APP_URL || "",
   authPathPrefix: "/auth",
   isEmbeddedApp: true,
-  sessionStorage: new PrismaSessionStorage(prisma),
+  sessionStorage: new PrismaSessionStorage(prisma, {
+    // Shopify's official retry configuration for database connection issues
+    connectionRetries: 5,           // Retry up to 5 times (default: 2)
+    connectionRetryIntervalMs: 3000 // Wait 3 seconds between retries (default: 5000)
+  }),
   
   hooks: {
     afterAuth: async ({ session, admin }) => {
