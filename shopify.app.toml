@@ -2,7 +2,7 @@
 
 client_id = "a0563782e38f84b7ce2ef0d2f5b87ed5"
 name = "ALWAYS Receptionist"
-application_url = "https://always-receptionist.vercel.app"
+application_url = "https://always-receptionist.vercel.app/app"
 embedded = true
 
 [build]
