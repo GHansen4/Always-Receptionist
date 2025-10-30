@@ -217,40 +217,32 @@ export default function PhoneNumbers() {
               <s-divider />
 
               <s-block-stack gap="300">
-                <s-inline-stack gap="400" wrap="false">
-                  <s-block-stack gap="100" style={{minWidth: '140px'}}>
-                    <s-text variant="bodySm" tone="subdued">Assistant Name</s-text>
-                    <s-text variant="bodyMd" as="p">{assistant.name}</s-text>
-                  </s-block-stack>
+                <s-block-stack gap="100">
+                  <s-text variant="bodySm" tone="subdued">Assistant Name</s-text>
+                  <s-text variant="bodyMd" as="p">{assistant.name}</s-text>
+                </s-block-stack>
 
-                  <s-block-stack gap="100" style={{minWidth: '200px'}}>
-                    <s-text variant="bodySm" tone="subdued">Assistant ID</s-text>
-                    <s-text variant="bodySm" as="p" style={{fontFamily: 'monospace', wordBreak: 'break-all'}}>
-                      {assistant.id}
-                    </s-text>
-                  </s-block-stack>
-                </s-inline-stack>
+                <s-block-stack gap="100">
+                  <s-text variant="bodySm" tone="subdued">Assistant ID</s-text>
+                  <s-text variant="bodySm" as="p">{assistant.id}</s-text>
+                </s-block-stack>
 
                 {assistant.voice && (
-                  <s-inline-stack gap="400" wrap="false">
-                    <s-block-stack gap="100" style={{minWidth: '140px'}}>
+                  <>
+                    <s-block-stack gap="100">
                       <s-text variant="bodySm" tone="subdued">Voice Provider</s-text>
-                      <s-text variant="bodyMd" as="p" style={{textTransform: 'capitalize'}}>
-                        {assistant.voice.provider}
-                      </s-text>
+                      <s-text variant="bodyMd" as="p">{assistant.voice.provider}</s-text>
                     </s-block-stack>
 
-                    <s-block-stack gap="100" style={{minWidth: '140px'}}>
+                    <s-block-stack gap="100">
                       <s-text variant="bodySm" tone="subdued">Voice</s-text>
-                      <s-text variant="bodyMd" as="p" style={{textTransform: 'capitalize'}}>
-                        {assistant.voice.voiceId}
-                      </s-text>
+                      <s-text variant="bodyMd" as="p">{assistant.voice.voiceId}</s-text>
                     </s-block-stack>
-                  </s-inline-stack>
+                  </>
                 )}
 
                 {assistant.model && (
-                  <s-block-stack gap="100" style={{minWidth: '140px'}}>
+                  <s-block-stack gap="100">
                     <s-text variant="bodySm" tone="subdued">AI Model</s-text>
                     <s-text variant="bodyMd" as="p">{assistant.model.model}</s-text>
                   </s-block-stack>
