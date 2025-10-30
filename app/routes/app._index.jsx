@@ -196,7 +196,7 @@ export default function Index() {
 
   return (
     <s-page heading="AI Receptionist Dashboard">
-      <s-button slot="primary-action" onClick={generateProduct}>
+      <s-button slot="primary-action" variant="primary" onClick={generateProduct}>
         Generate a product
       </s-button>
 
