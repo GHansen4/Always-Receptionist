@@ -1,13 +1,15 @@
-import { useLoaderData, useSubmit, useNavigation } from "react-router";
+import { useState } from "react";
+import { useLoaderData, useSubmit, useNavigation, useActionData } from "react-router";
 import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
+import { createVapiAssistant } from "../utils/vapi.server";
 
 // Loader: Get current phone number status
 export async function loader({ request }) {
   console.log("\n=== PHONE NUMBERS ROUTE LOADER ===");
   console.log("URL:", request.url);
   console.log("Method:", request.method);
-  
+
   try {
     console.log("🔐 Attempting authentication...");
     const { session } = await authenticate.admin(request);
@@ -21,6 +23,7 @@ export async function loader({ request }) {
         phoneNumber: true,
         phoneNumberId: true,
         assistantId: true,
+        vapiSignature: true,
       }
     });
 
@@ -51,6 +54,7 @@ export async function loader({ request }) {
       hasAssistant: !!vapiConfig?.assistantId,
       assistant,
       shop: session.shop,
+      vapiConfig,
     };
   } catch (error) {
     console.error("\n❌ PHONE NUMBERS LOADER ERROR");
@@ -58,32 +62,129 @@ export async function loader({ request }) {
     console.error("Error message:", error.message);
     console.error("Status:", error.status || error.statusCode || "unknown");
     console.error("Stack:", error.stack);
-    
+
     // Re-throw authentication errors
     if (error.status === 401 || error.statusCode === 401 || error.message?.includes('Unauthorized')) {
       console.error("Authentication error detected - re-throwing for React Router");
       throw error;
     }
-    
+
     return { error: error.message };
   }
 }
 
-// Action: Provision or release phone number
+// Action: Provision or release phone number, or create assistant
 export async function action({ request }) {
   console.log("\n=== PHONE NUMBERS ROUTE ACTION ===");
   console.log("URL:", request.url);
   console.log("Method:", request.method);
-  
+
   try {
     console.log("🔐 Attempting authentication...");
     const { session } = await authenticate.admin(request);
     console.log("✅ Authentication successful!");
     console.log("Session ID:", session.id);
     console.log("Shop:", session.shop);
-    
+
     const formData = await request.formData();
     const action = formData.get("action");
+
+    if (action === "create_assistant") {
+      console.log("Creating new VAPI assistant...");
+
+      // Get or create vapiConfig with signature
+      let vapiConfig = await prisma.vapiConfig.findUnique({
+        where: { shop: session.shop }
+      });
+
+      if (!vapiConfig) {
+        // Create new config with signature
+        const crypto = await import('crypto');
+        const vapiSignature = crypto.randomBytes(32).toString('hex');
+        vapiConfig = await prisma.vapiConfig.create({
+          data: {
+            shop: session.shop,
+            vapiSignature,
+          }
+        });
+      }
+
+      // Build assistant payload from form data
+      const shopName = session.shop.replace('.myshopify.com', '');
+      const assistantName = formData.get("assistantName") || `${shopName} Receptionist`;
+      const voiceProvider = formData.get("voiceProvider") || "openai";
+      const voiceId = formData.get("voiceId") || "echo";
+      const model = formData.get("model") || "gpt-4o";
+      const temperature = parseFloat(formData.get("temperature") || "0.7");
+      const systemPrompt = formData.get("systemPrompt") || `You are a friendly AI receptionist for an online store.
+
+Your role:
+- Answer questions about products and inventory
+- Help customers find what they're looking for
+- Be helpful, professional, and concise
+
+Important rules:
+- Never make up product information - always use the get_products tool
+- Keep responses brief and conversational (this is a phone call)
+- If you don't know something, be honest and offer to transfer to a human
+
+The store you're representing is: ${session.shop}`;
+      const firstMessage = formData.get("firstMessage") || "Hi! Thanks for calling. How can I help you today?";
+      const endCallMessage = formData.get("endCallMessage") || "Thanks for calling! Have a great day!";
+
+      const payload = {
+        name: assistantName,
+        model: {
+          provider: "openai",
+          model: model,
+          temperature: temperature,
+          systemPrompt: systemPrompt,
+        },
+        voice: {
+          provider: voiceProvider,
+          voiceId: voiceId,
+        },
+        firstMessage: firstMessage,
+        endCallMessage: endCallMessage,
+        serverUrl: `https://always-receptionist.vercel.app/api/vapi/products`,
+        serverUrlSecret: vapiConfig.vapiSignature,
+      };
+
+      const response = await fetch("https://api.vapi.ai/assistant", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${process.env.VAPI_PRIVATE_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("VAPI API error:", errorText);
+        return {
+          success: false,
+          error: `Failed to create assistant: ${errorText}`
+        };
+      }
+
+      const assistant = await response.json();
+      console.log("✅ Assistant created:", assistant.id);
+
+      // Save assistant ID to database
+      await prisma.vapiConfig.update({
+        where: { shop: session.shop },
+        data: {
+          assistantId: assistant.id,
+        }
+      });
+
+      return {
+        success: true,
+        message: "Assistant created successfully!",
+        assistantId: assistant.id,
+      };
+    }
 
     if (action === "provision") {
       // Call VAPI API to buy a phone number
@@ -100,9 +201,9 @@ export async function action({ request }) {
 
       if (!vapiResponse.ok) {
         const error = await vapiResponse.json();
-        return { 
-          success: false, 
-          error: error.message || "Failed to provision number" 
+        return {
+          success: false,
+          error: error.message || "Failed to provision number"
         };
       }
 
@@ -117,9 +218,9 @@ export async function action({ request }) {
         }
       });
 
-      return { 
-        success: true, 
-        phoneNumber: phoneNumberData.number 
+      return {
+        success: true,
+        phoneNumber: phoneNumberData.number
       };
     }
 
@@ -151,33 +252,36 @@ export async function action({ request }) {
     }
 
     return { success: false, error: "Invalid action" };
-    
+
   } catch (error) {
     console.error("\n❌ PHONE NUMBERS ACTION ERROR");
     console.error("Error type:", error.constructor.name);
     console.error("Error message:", error.message);
     console.error("Status:", error.status || error.statusCode || "unknown");
     console.error("Stack:", error.stack);
-    
+
     // Re-throw authentication errors
     if (error.status === 401 || error.statusCode === 401 || error.message?.includes('Unauthorized')) {
       console.error("Authentication error detected - re-throwing for React Router");
       throw error;
     }
-    
-    return { 
-      success: false, 
-      error: error.message 
+
+    return {
+      success: false,
+      error: error.message
     };
   }
 }
 
 // Component using Polaris web components
 export default function PhoneNumbers() {
-  const { phoneNumber, hasAssistant, assistant } = useLoaderData();
+  const { phoneNumber, hasAssistant, assistant, shop } = useLoaderData();
+  const actionData = useActionData();
   const submit = useSubmit();
   const navigation = useNavigation();
   const isLoading = navigation.state !== "idle";
+
+  const [showAssistantForm, setShowAssistantForm] = useState(false);
 
   const handleProvision = () => {
     const formData = new FormData();
@@ -193,16 +297,280 @@ export default function PhoneNumbers() {
     }
   };
 
+  const handleCreateAssistant = (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    formData.append("action", "create_assistant");
+    submit(formData, { method: "post" });
+  };
+
+  const shopName = shop?.replace('.myshopify.com', '') || '';
+
   return (
     <s-page heading="Phone Numbers">
       <s-block-stack gap="500">
-        {!hasAssistant && (
-          <s-banner tone="warning">
-            <p>Your AI assistant is not configured yet. Please complete setup first.</p>
+        {actionData?.success && (
+          <s-banner tone="success">
+            <p>{actionData.message || "Operation completed successfully!"}</p>
           </s-banner>
         )}
 
-        {assistant && (
+        {actionData?.error && (
+          <s-banner tone="critical">
+            <p>Error: {actionData.error}</p>
+          </s-banner>
+        )}
+
+        {!hasAssistant ? (
+          <s-card>
+            <s-block-stack gap="400">
+              <s-block-stack gap="200">
+                <s-text variant="headingMd" as="h2">
+                  Create AI Assistant
+                </s-text>
+                <s-text tone="subdued">
+                  Configure your VAPI assistant to handle customer calls
+                </s-text>
+              </s-block-stack>
+
+              <s-divider />
+
+              {!showAssistantForm ? (
+                <s-block-stack gap="300">
+                  <s-text as="p">
+                    You need to create an AI assistant before you can provision a phone number.
+                    The assistant will answer calls and help your customers.
+                  </s-text>
+                  <s-button
+                    variant="primary"
+                    size="large"
+                    onClick={() => setShowAssistantForm(true)}
+                  >
+                    Create Assistant
+                  </s-button>
+                </s-block-stack>
+              ) : (
+                <form onSubmit={handleCreateAssistant}>
+                  <s-block-stack gap="400">
+                    <s-block-stack gap="200">
+                      <label htmlFor="assistantName">
+                        <s-text variant="bodyMd" as="span">Assistant Name</s-text>
+                      </label>
+                      <input
+                        id="assistantName"
+                        name="assistantName"
+                        type="text"
+                        defaultValue={`${shopName} Receptionist`}
+                        placeholder="My Store Receptionist"
+                        maxLength="40"
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          border: '1px solid #c4cdd5',
+                          borderRadius: '4px',
+                          fontSize: '14px',
+                        }}
+                      />
+                      <s-text variant="bodySm" tone="subdued">Maximum 40 characters</s-text>
+                    </s-block-stack>
+
+                    <s-block-stack gap="200">
+                      <label htmlFor="voiceProvider">
+                        <s-text variant="bodyMd" as="span">Voice Provider</s-text>
+                      </label>
+                      <select
+                        id="voiceProvider"
+                        name="voiceProvider"
+                        defaultValue="openai"
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          border: '1px solid #c4cdd5',
+                          borderRadius: '4px',
+                          fontSize: '14px',
+                        }}
+                      >
+                        <option value="openai">OpenAI</option>
+                        <option value="11labs">ElevenLabs</option>
+                        <option value="playht">PlayHT</option>
+                      </select>
+                    </s-block-stack>
+
+                    <s-block-stack gap="200">
+                      <label htmlFor="voiceId">
+                        <s-text variant="bodyMd" as="span">Voice ID</s-text>
+                      </label>
+                      <input
+                        id="voiceId"
+                        name="voiceId"
+                        type="text"
+                        defaultValue="echo"
+                        placeholder="echo, ash, alloy, etc."
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          border: '1px solid #c4cdd5',
+                          borderRadius: '4px',
+                          fontSize: '14px',
+                        }}
+                      />
+                      <s-text variant="bodySm" tone="subdued">
+                        For OpenAI: alloy, echo, fable, onyx, nova, shimmer
+                      </s-text>
+                    </s-block-stack>
+
+                    <s-block-stack gap="200">
+                      <label htmlFor="model">
+                        <s-text variant="bodyMd" as="span">AI Model</s-text>
+                      </label>
+                      <select
+                        id="model"
+                        name="model"
+                        defaultValue="gpt-4o"
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          border: '1px solid #c4cdd5',
+                          borderRadius: '4px',
+                          fontSize: '14px',
+                        }}
+                      >
+                        <option value="gpt-4o">GPT-4o (Recommended)</option>
+                        <option value="gpt-4o-mini">GPT-4o Mini (Faster, cheaper)</option>
+                        <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                        <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Cheapest)</option>
+                      </select>
+                    </s-block-stack>
+
+                    <s-block-stack gap="200">
+                      <label htmlFor="temperature">
+                        <s-text variant="bodyMd" as="span">Temperature (Creativity)</s-text>
+                      </label>
+                      <input
+                        id="temperature"
+                        name="temperature"
+                        type="number"
+                        min="0"
+                        max="1"
+                        step="0.1"
+                        defaultValue="0.7"
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          border: '1px solid #c4cdd5',
+                          borderRadius: '4px',
+                          fontSize: '14px',
+                        }}
+                      />
+                      <s-text variant="bodySm" tone="subdued">
+                        0 = More focused, 1 = More creative
+                      </s-text>
+                    </s-block-stack>
+
+                    <s-block-stack gap="200">
+                      <label htmlFor="firstMessage">
+                        <s-text variant="bodyMd" as="span">First Message</s-text>
+                      </label>
+                      <input
+                        id="firstMessage"
+                        name="firstMessage"
+                        type="text"
+                        defaultValue="Hi! Thanks for calling. How can I help you today?"
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          border: '1px solid #c4cdd5',
+                          borderRadius: '4px',
+                          fontSize: '14px',
+                        }}
+                      />
+                      <s-text variant="bodySm" tone="subdued">
+                        What the assistant says when answering the call
+                      </s-text>
+                    </s-block-stack>
+
+                    <s-block-stack gap="200">
+                      <label htmlFor="endCallMessage">
+                        <s-text variant="bodyMd" as="span">End Call Message</s-text>
+                      </label>
+                      <input
+                        id="endCallMessage"
+                        name="endCallMessage"
+                        type="text"
+                        defaultValue="Thanks for calling! Have a great day!"
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          border: '1px solid #c4cdd5',
+                          borderRadius: '4px',
+                          fontSize: '14px',
+                        }}
+                      />
+                      <s-text variant="bodySm" tone="subdued">
+                        What the assistant says before hanging up
+                      </s-text>
+                    </s-block-stack>
+
+                    <s-block-stack gap="200">
+                      <label htmlFor="systemPrompt">
+                        <s-text variant="bodyMd" as="span">System Prompt (Instructions)</s-text>
+                      </label>
+                      <textarea
+                        id="systemPrompt"
+                        name="systemPrompt"
+                        rows="8"
+                        defaultValue={`You are a friendly AI receptionist for an online store.
+
+Your role:
+- Answer questions about products and inventory
+- Help customers find what they're looking for
+- Be helpful, professional, and concise
+
+Important rules:
+- Never make up product information - always use the get_products tool
+- Keep responses brief and conversational (this is a phone call)
+- If you don't know something, be honest and offer to transfer to a human
+
+The store you're representing is: ${shop}`}
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          border: '1px solid #c4cdd5',
+                          borderRadius: '4px',
+                          fontSize: '14px',
+                          fontFamily: 'monospace',
+                          resize: 'vertical',
+                        }}
+                      />
+                      <s-text variant="bodySm" tone="subdued">
+                        Instructions that define how the assistant behaves
+                      </s-text>
+                    </s-block-stack>
+
+                    <s-inline-stack gap="200">
+                      <s-button
+                        type="submit"
+                        variant="primary"
+                        loading={isLoading}
+                        disabled={isLoading}
+                      >
+                        Create Assistant
+                      </s-button>
+                      <s-button
+                        type="button"
+                        onClick={() => setShowAssistantForm(false)}
+                        disabled={isLoading}
+                      >
+                        Cancel
+                      </s-button>
+                    </s-inline-stack>
+                  </s-block-stack>
+                </form>
+              )}
+            </s-block-stack>
+          </s-card>
+        ) : (
           <s-card>
             <s-block-stack gap="400">
               <s-block-stack gap="200">
