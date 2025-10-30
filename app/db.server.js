@@ -23,9 +23,9 @@ if (!connectionString) {
 
 console.log('✅ Creating Prisma client with Neon adapter...')
 
-// Create pool and adapter
+// Pass connectionString to BOTH Pool AND PrismaNeon adapter
 const pool = new Pool({ connectionString })
-const adapter = new PrismaNeon(pool)
+const adapter = new PrismaNeon(pool, { connectionString })  // ← Added connectionString here!
 
 // Create Prisma client immediately at module load
 const prisma = new PrismaClient({ 
