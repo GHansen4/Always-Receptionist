@@ -10,11 +10,17 @@ const globalForPrisma = global
 
 let prisma
 
-// Use custom DATABASE_URL with connection pooling params if available
-const connectionString = process.env.DATABASE_URL_CUSTOM || process.env.DATABASE_URL
+// Use DATABASE_URL (no custom parameters needed with serverless driver)
+const connectionString = process.env.DATABASE_URL
+
+if (!connectionString) {
+  console.error('❌ DATABASE_URL not found in environment variables')
+  throw new Error('DATABASE_URL is required but not set')
+}
+
+console.log('✅ Database connection string found')
 
 if (process.env.NODE_ENV === 'production') {
-  // Use Neon serverless driver adapter for production
   const pool = new Pool({ connectionString })
   const adapter = new PrismaNeon(pool)
   
@@ -24,7 +30,6 @@ if (process.env.NODE_ENV === 'production') {
   })
 } else {
   if (!globalForPrisma.prisma) {
-    // Use Neon serverless driver adapter for development too
     const pool = new Pool({ connectionString })
     const adapter = new PrismaNeon(pool)
     
