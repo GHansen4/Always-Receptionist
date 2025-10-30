@@ -1,39 +1,36 @@
 import { PrismaClient } from '@prisma/client'
+import { PrismaNeon } from '@prisma/adapter-neon'
+import { Pool, neonConfig } from '@neondatabase/serverless'
+import ws from 'ws'
+
+// Configure WebSocket for Node.js environments
+neonConfig.webSocketConstructor = ws
 
 const globalForPrisma = global
 
-// Retry wrapper for database operations (not client creation)
-export async function withRetry(operation, maxRetries = 3) {
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      return await operation()
-    } catch (error) {
-      const isConnectionError = 
-        error.message?.includes("Can't reach database") ||
-        error.message?.includes("Connection timeout") ||
-        error.message?.includes("ETIMEDOUT")
-      
-      if (!isConnectionError || attempt === maxRetries) {
-        throw error
-      }
-      
-      console.log(`⚠️  Database operation attempt ${attempt} failed, retrying...`)
-      // Wait before retrying (exponential backoff: 1s, 2s, 3s)
-      await new Promise(resolve => setTimeout(resolve, 1000 * attempt))
-    }
-  }
-}
-
 let prisma
 
+// Use custom DATABASE_URL with connection pooling params if available
+const connectionString = process.env.DATABASE_URL_CUSTOM || process.env.DATABASE_URL
+
 if (process.env.NODE_ENV === 'production') {
-  prisma = new PrismaClient({
-    log: ['error'],
+  // Use Neon serverless driver adapter for production
+  const pool = new Pool({ connectionString })
+  const adapter = new PrismaNeon(pool)
+  
+  prisma = new PrismaClient({ 
+    adapter,
+    log: ['error']
   })
 } else {
   if (!globalForPrisma.prisma) {
-    globalForPrisma.prisma = new PrismaClient({
-      log: ['query', 'error', 'warn'],
+    // Use Neon serverless driver adapter for development too
+    const pool = new Pool({ connectionString })
+    const adapter = new PrismaNeon(pool)
+    
+    globalForPrisma.prisma = new PrismaClient({ 
+      adapter,
+      log: ['query', 'error', 'warn']
     })
   }
   prisma = globalForPrisma.prisma
