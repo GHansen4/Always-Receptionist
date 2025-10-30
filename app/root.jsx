@@ -1,5 +1,4 @@
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
-import { AppProvider } from "@shopify/shopify-app-react-router/react";
 
 export default function App() {
   return (
@@ -12,13 +11,12 @@ export default function App() {
           rel="stylesheet"
           href="https://cdn.shopify.com/static/fonts/inter/v4/styles.css"
         />
+        <script src="https://cdn.shopify.com/shopifycloud/polaris.js" defer></script>
         <Meta />
         <Links />
       </head>
       <body>
-        <AppProvider isEmbeddedApp>
-          <Outlet />
-        </AppProvider>
+        <Outlet />
         <ScrollRestoration />
         <Scripts />
       </body>
