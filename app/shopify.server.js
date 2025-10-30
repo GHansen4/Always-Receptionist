@@ -9,16 +9,12 @@ import { randomBytes } from "crypto";
 const shopify = shopifyApp({
   apiKey: process.env.SHOPIFY_API_KEY,
   apiSecretKey: process.env.SHOPIFY_API_SECRET || "",
-  apiVersion: "2024-10", // Use the current stable API version
+  apiVersion: "2024-10",
   scopes: process.env.SCOPES?.split(","),
   appUrl: process.env.SHOPIFY_APP_URL || "",
   authPathPrefix: "/auth",
   isEmbeddedApp: true,
-  sessionStorage: new PrismaSessionStorage(prisma, {
-    // Shopify's official retry configuration for database connection issues
-    connectionRetries: 5,           // Retry up to 5 times (default: 2)
-    connectionRetryIntervalMs: 3000 // Wait 3 seconds between retries (default: 5000)
-  }),
+  sessionStorage: new PrismaSessionStorage(prisma), // ✅ FIXED: Removed invalid second parameter
   
   hooks: {
     afterAuth: async ({ session, admin }) => {
@@ -45,7 +41,7 @@ const shopify = shopifyApp({
           console.log("   Assistant ID:", existingConfig.assistantId);
           console.log("   Phone Number:", existingConfig.phoneNumber || "None");
           console.log("=".repeat(60) + "\n");
-          return; // Exit early
+          return;
         }
 
         console.log("📝 No existing config found. Creating new one...\n");
@@ -95,9 +91,6 @@ const shopify = shopifyApp({
         console.error("\nStack Trace:");
         console.error(error.stack);
         console.error("=".repeat(60) + "\n");
-        
-        // Don't throw - we don't want to block OAuth
-        // But log it clearly so we can see what failed
       }
     },
   },
