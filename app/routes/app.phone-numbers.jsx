@@ -171,7 +171,7 @@ The store you're representing is: ${session.shop}`;
       const assistant = await response.json();
       console.log("✅ Assistant created:", assistant.id);
 
-      // Save assistant ID to database
+      // Save assistant ID to database, please
       await prisma.vapiConfig.update({
         where: { shop: session.shop },
         data: {
