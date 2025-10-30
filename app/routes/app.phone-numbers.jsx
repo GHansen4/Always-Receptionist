@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLoaderData, useSubmit, useNavigation, useActionData } from "react-router";
+import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
 
@@ -721,3 +722,7 @@ The store you're representing is: ${shop}`}
     </>
   );
 }
+
+export const headers = (headersArgs) => {
+  return boundary.headers(headersArgs);
+};
