@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useLoaderData, useSubmit, useNavigation, useActionData } from "react-router";
 import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
-import { createVapiAssistant } from "../utils/vapi.server";
 
 // Loader: Get current phone number status
 export async function loader({ request }) {
