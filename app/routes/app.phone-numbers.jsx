@@ -171,7 +171,7 @@ The store you're representing is: ${session.shop}`;
       const assistant = await response.json();
       console.log("✅ Assistant created:", assistant.id);
 
-      // Save assistant ID to database, please
+      // Save assistant ID to database
       await prisma.vapiConfig.update({
         where: { shop: session.shop },
         data: {
@@ -679,7 +679,7 @@ The store you're representing is: ${shop}`}
                   disabled={isLoading || !hasAssistant}
                   size="large"
                 >
-                  Provision Phone Number
+                  Provision Phone Number!!!
                 </s-button>
 
                 {!hasAssistant && (
