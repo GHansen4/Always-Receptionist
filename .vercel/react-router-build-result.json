@@ -1,0 +1,374 @@
+{
+  "buildManifest": {
+    "serverBundles": {
+      "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0": {
+        "id": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+        "file": "build/server/nodejs_eyJydW50aW1lIjoibm9kZWpzIn0/index.js",
+        "config": {
+          "runtime": "nodejs"
+        }
+      }
+    },
+    "routeIdToServerBundleId": {
+      "routes/webhooks.app.scopes_update": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/webhooks.app.uninstalled": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api.shop-format-test": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api.debug-sessions": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api.vapi.products": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api.session-test": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/auth.login": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api.debug": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/auth.$": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/_index": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/app": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/app.phone-numbers": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/app.additional": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/app.index": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/$": "nodejs_eyJydW50aW1lIjoibm9kZWpzIn0"
+    },
+    "routes": {
+      "root": {
+        "id": "root",
+        "file": "app/root.jsx",
+        "path": "",
+        "config": {}
+      },
+      "routes/webhooks.app.scopes_update": {
+        "id": "routes/webhooks.app.scopes_update",
+        "parentId": "root",
+        "file": "app/routes/webhooks.app.scopes_update.jsx",
+        "path": "webhooks/app/scopes_update",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/webhooks.app.uninstalled": {
+        "id": "routes/webhooks.app.uninstalled",
+        "parentId": "root",
+        "file": "app/routes/webhooks.app.uninstalled.jsx",
+        "path": "webhooks/app/uninstalled",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/api.shop-format-test": {
+        "id": "routes/api.shop-format-test",
+        "parentId": "root",
+        "file": "app/routes/api.shop-format-test.jsx",
+        "path": "api/shop-format-test",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/api.debug-sessions": {
+        "id": "routes/api.debug-sessions",
+        "parentId": "root",
+        "file": "app/routes/api.debug-sessions.jsx",
+        "path": "api/debug-sessions",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/api.vapi.products": {
+        "id": "routes/api.vapi.products",
+        "parentId": "root",
+        "file": "app/routes/api.vapi.products.jsx",
+        "path": "api/vapi/products",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/api.session-test": {
+        "id": "routes/api.session-test",
+        "parentId": "root",
+        "file": "app/routes/api.session-test.jsx",
+        "path": "api/session-test",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/auth.login": {
+        "id": "routes/auth.login",
+        "parentId": "root",
+        "file": "app/routes/auth.login.jsx",
+        "path": "auth/login",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/api.debug": {
+        "id": "routes/api.debug",
+        "parentId": "root",
+        "file": "app/routes/api.debug.jsx",
+        "path": "api/debug",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/auth.$": {
+        "id": "routes/auth.$",
+        "parentId": "root",
+        "file": "app/routes/auth.$.jsx",
+        "path": "auth/*",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/_index": {
+        "id": "routes/_index",
+        "parentId": "root",
+        "file": "app/routes/_index.jsx",
+        "index": true,
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/app": {
+        "id": "routes/app",
+        "parentId": "root",
+        "file": "app/routes/app.jsx",
+        "path": "app",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/app.phone-numbers": {
+        "id": "routes/app.phone-numbers",
+        "parentId": "routes/app",
+        "file": "app/routes/app.phone-numbers.jsx",
+        "path": "phone-numbers",
+        "config": {}
+      },
+      "routes/app.additional": {
+        "id": "routes/app.additional",
+        "parentId": "routes/app",
+        "file": "app/routes/app.additional.jsx",
+        "path": "additional",
+        "config": {}
+      },
+      "routes/app.index": {
+        "id": "routes/app.index",
+        "parentId": "routes/app",
+        "file": "app/routes/app.index.jsx",
+        "path": "index",
+        "config": {}
+      },
+      "routes/$": {
+        "id": "routes/$",
+        "parentId": "root",
+        "file": "app/routes/$.jsx",
+        "path": "*",
+        "config": {
+          "runtime": "nodejs"
+        }
+      }
+    }
+  },
+  "reactRouterConfig": {
+    "appDirectory": "C:/Users/ghans/always-receptionist/app",
+    "basename": "/",
+    "buildDirectory": "C:/Users/ghans/always-receptionist/build",
+    "future": {
+      "v8_middleware": false,
+      "unstable_optimizeDeps": false,
+      "unstable_splitRouteModules": false,
+      "unstable_subResourceIntegrity": false,
+      "unstable_viteEnvironmentApi": false
+    },
+    "routes": {
+      "root": {
+        "id": "root",
+        "file": "root.jsx",
+        "path": ""
+      },
+      "routes/webhooks.app.scopes_update": {
+        "id": "routes/webhooks.app.scopes_update",
+        "parentId": "root",
+        "file": "routes/webhooks.app.scopes_update.jsx",
+        "path": "webhooks/app/scopes_update"
+      },
+      "routes/webhooks.app.uninstalled": {
+        "id": "routes/webhooks.app.uninstalled",
+        "parentId": "root",
+        "file": "routes/webhooks.app.uninstalled.jsx",
+        "path": "webhooks/app/uninstalled"
+      },
+      "routes/api.shop-format-test": {
+        "id": "routes/api.shop-format-test",
+        "parentId": "root",
+        "file": "routes/api.shop-format-test.jsx",
+        "path": "api/shop-format-test"
+      },
+      "routes/api.debug-sessions": {
+        "id": "routes/api.debug-sessions",
+        "parentId": "root",
+        "file": "routes/api.debug-sessions.jsx",
+        "path": "api/debug-sessions"
+      },
+      "routes/api.vapi.products": {
+        "id": "routes/api.vapi.products",
+        "parentId": "root",
+        "file": "routes/api.vapi.products.jsx",
+        "path": "api/vapi/products"
+      },
+      "routes/api.session-test": {
+        "id": "routes/api.session-test",
+        "parentId": "root",
+        "file": "routes/api.session-test.jsx",
+        "path": "api/session-test"
+      },
+      "routes/auth.login": {
+        "id": "routes/auth.login",
+        "parentId": "root",
+        "file": "routes/auth.login.jsx",
+        "path": "auth/login"
+      },
+      "routes/api.debug": {
+        "id": "routes/api.debug",
+        "parentId": "root",
+        "file": "routes/api.debug.jsx",
+        "path": "api/debug"
+      },
+      "routes/auth.$": {
+        "id": "routes/auth.$",
+        "parentId": "root",
+        "file": "routes/auth.$.jsx",
+        "path": "auth/*"
+      },
+      "routes/_index": {
+        "id": "routes/_index",
+        "parentId": "root",
+        "file": "routes/_index.jsx",
+        "index": true
+      },
+      "routes/app": {
+        "id": "routes/app",
+        "parentId": "root",
+        "file": "routes/app.jsx",
+        "path": "app"
+      },
+      "routes/app.phone-numbers": {
+        "id": "routes/app.phone-numbers",
+        "parentId": "routes/app",
+        "file": "routes/app.phone-numbers.jsx",
+        "path": "phone-numbers"
+      },
+      "routes/app.additional": {
+        "id": "routes/app.additional",
+        "parentId": "routes/app",
+        "file": "routes/app.additional.jsx",
+        "path": "additional"
+      },
+      "routes/app.index": {
+        "id": "routes/app.index",
+        "parentId": "routes/app",
+        "file": "routes/app.index.jsx",
+        "path": "index"
+      },
+      "routes/$": {
+        "id": "routes/$",
+        "parentId": "root",
+        "file": "routes/$.jsx",
+        "path": "*"
+      }
+    },
+    "routeDiscovery": {
+      "mode": "lazy",
+      "manifestPath": "/__manifest"
+    },
+    "serverBuildFile": "index.js",
+    "serverModuleFormat": "esm",
+    "ssr": true,
+    "unstable_routeConfig": [
+      {
+        "id": "root",
+        "path": "",
+        "file": "root.jsx",
+        "children": [
+          {
+            "id": "routes/webhooks.app.scopes_update",
+            "file": "routes/webhooks.app.scopes_update.jsx",
+            "path": "webhooks/app/scopes_update"
+          },
+          {
+            "id": "routes/webhooks.app.uninstalled",
+            "file": "routes/webhooks.app.uninstalled.jsx",
+            "path": "webhooks/app/uninstalled"
+          },
+          {
+            "id": "routes/api.shop-format-test",
+            "file": "routes/api.shop-format-test.jsx",
+            "path": "api/shop-format-test"
+          },
+          {
+            "id": "routes/api.debug-sessions",
+            "file": "routes/api.debug-sessions.jsx",
+            "path": "api/debug-sessions"
+          },
+          {
+            "id": "routes/api.vapi.products",
+            "file": "routes/api.vapi.products.jsx",
+            "path": "api/vapi/products"
+          },
+          {
+            "id": "routes/api.session-test",
+            "file": "routes/api.session-test.jsx",
+            "path": "api/session-test"
+          },
+          {
+            "id": "routes/auth.login",
+            "file": "routes/auth.login.jsx",
+            "path": "auth/login"
+          },
+          {
+            "id": "routes/api.debug",
+            "file": "routes/api.debug.jsx",
+            "path": "api/debug"
+          },
+          {
+            "id": "routes/auth.$",
+            "file": "routes/auth.$.jsx",
+            "path": "auth/*"
+          },
+          {
+            "id": "routes/_index",
+            "file": "routes/_index.jsx",
+            "index": true
+          },
+          {
+            "id": "routes/app",
+            "file": "routes/app.jsx",
+            "path": "app",
+            "children": [
+              {
+                "id": "routes/app.phone-numbers",
+                "file": "routes/app.phone-numbers.jsx",
+                "path": "phone-numbers"
+              },
+              {
+                "id": "routes/app.additional",
+                "file": "routes/app.additional.jsx",
+                "path": "additional"
+              },
+              {
+                "id": "routes/app.index",
+                "file": "routes/app.index.jsx",
+                "path": "index"
+              }
+            ]
+          },
+          {
+            "id": "routes/$",
+            "file": "routes/$.jsx",
+            "path": "*"
+          }
+        ]
+      }
+    ]
+  },
+  "viteConfig": {
+    "build": {
+      "assetsDir": "assets"
+    }
+  }
+}

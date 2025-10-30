@@ -2,6 +2,7 @@ import { Outlet, useLoaderData, useRouteError } from "react-router";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { AppProvider } from "@shopify/shopify-app-react-router/react";
 import { authenticate } from "../shopify.server";
+import { withRetry } from "../db.server";
 
 export const loader = async ({ request }) => {
   console.log("\n=== APP ROUTE LOADER ===");
@@ -10,7 +11,12 @@ export const loader = async ({ request }) => {
   console.log("Headers:", Object.fromEntries(request.headers.entries()));
   
   console.log("🔐 Attempting authentication...");
-  await authenticate.admin(request);
+  
+  // Wrap authenticate.admin with retry logic for database connection
+  await withRetry(async () => {
+    return await authenticate.admin(request);
+  });
+  
   console.log("✅ Authentication successful!");
   
   const apiKey = process.env.SHOPIFY_API_KEY || "";

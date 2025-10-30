@@ -1,29 +1,42 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client'
 
-// Use DATABASE_URL_CUSTOM as the connection string
-const databaseUrl = process.env.DATABASE_URL_CUSTOM || process.env.DATABASE_URL;
+const globalForPrisma = global
 
-if (!databaseUrl) {
-  throw new Error("DATABASE_URL_CUSTOM is not set in environment variables");
+// Retry wrapper for database operations (not client creation)
+export async function withRetry(operation, maxRetries = 3) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await operation()
+    } catch (error) {
+      const isConnectionError = 
+        error.message?.includes("Can't reach database") ||
+        error.message?.includes("Connection timeout") ||
+        error.message?.includes("ETIMEDOUT")
+      
+      if (!isConnectionError || attempt === maxRetries) {
+        throw error
+      }
+      
+      console.log(`⚠️  Database operation attempt ${attempt} failed, retrying...`)
+      // Wait before retrying (exponential backoff: 1s, 2s, 3s)
+      await new Promise(resolve => setTimeout(resolve, 1000 * attempt))
+    }
+  }
 }
 
-// Declare global type for TypeScript compatibility
-const globalForPrisma = global;
+let prisma
 
-// Use global singleton pattern in ALL environments (including production)
-if (!globalForPrisma.prismaGlobal) {
-  console.log("🔌 Connecting to database...");
-  console.log("   Using:", databaseUrl.substring(0, 30) + "...");
-  
-  globalForPrisma.prismaGlobal = new PrismaClient({
-    datasources: {
-      db: {
-        url: databaseUrl,
-      },
-    },
-  });
+if (process.env.NODE_ENV === 'production') {
+  prisma = new PrismaClient({
+    log: ['error'],
+  })
+} else {
+  if (!globalForPrisma.prisma) {
+    globalForPrisma.prisma = new PrismaClient({
+      log: ['query', 'error', 'warn'],
+    })
+  }
+  prisma = globalForPrisma.prisma
 }
 
-const prisma = globalForPrisma.prismaGlobal;
-
-export default prisma;
+export default prisma
