@@ -131,34 +131,8 @@ The store you're representing is: ${session.shop}`;
       const firstMessage = formData.get("firstMessage") || "Hi! Thanks for calling. How can I help you today?";
       const endCallMessage = formData.get("endCallMessage") || "Thanks for calling! Have a great day!";
 
-      // Fetch existing tools from VAPI to find get_products tool
-      let toolIds = [];
-      try {
-        const toolsResponse = await fetch("https://api.vapi.ai/tool", {
-          headers: {
-            "Authorization": `Bearer ${process.env.VAPI_PRIVATE_KEY}`,
-          }
-        });
-
-        if (toolsResponse.ok) {
-          const tools = await toolsResponse.json();
-          // Find the get_products tool
-          const getProductsTool = tools.find(tool =>
-            tool.function?.name === "get_products" ||
-            tool.name === "get_products"
-          );
-
-          if (getProductsTool) {
-            toolIds = [getProductsTool.id];
-            console.log("✅ Found existing get_products tool:", getProductsTool.id);
-          } else {
-            console.log("⚠️ No get_products tool found in VAPI");
-          }
-        }
-      } catch (toolError) {
-        console.log("⚠️ Error fetching tools:", toolError.message);
-      }
-
+      // VAPI handles tools through the serverUrl webhook endpoint
+      // The serverUrl receives function calls and returns results
       const payload = {
         name: assistantName,
         model: {
@@ -176,11 +150,6 @@ The store you're representing is: ${session.shop}`;
         serverUrl: `https://always-receptionist.vercel.app/api/vapi/products`,
         serverUrlSecret: vapiConfig.vapiSignature,
       };
-
-      // Add toolIds if we found the get_products tool
-      if (toolIds.length > 0) {
-        payload.toolIds = toolIds;
-      }
 
 
       const response = await fetch("https://api.vapi.ai/assistant", {
