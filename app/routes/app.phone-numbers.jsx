@@ -429,18 +429,8 @@ export default function PhoneNumbers() {
         )}
 
         {!hasAssistant ? (
-          <s-card>
+          <s-section heading="Create AI Assistant">
             <s-block-stack gap="400">
-              <s-block-stack gap="200">
-                <s-text variant="headingMd" as="h2">
-                  Create AI Assistant
-                </s-text>
-                <s-text tone="subdued">
-                  Configure your VAPI assistant to handle customer calls
-                </s-text>
-              </s-block-stack>
-
-              <s-divider />
 
               {!showAssistantForm ? (
                 <s-block-stack gap="300">
@@ -561,20 +551,9 @@ The store you're representing is: ${shop}`}
                 </form>
               )}
             </s-block-stack>
-          </s-card>
+          </s-section>
         ) : (
-          <s-card>
-            <s-block-stack gap="400">
-              <s-block-stack gap="200">
-                <s-text variant="headingMd" as="h2">
-                  AI Assistant Configuration
-                </s-text>
-                <s-text tone="subdued">
-                  Your VAPI assistant is active and ready to handle customer calls
-                </s-text>
-              </s-block-stack>
-
-              <s-divider />
+          <s-section heading="AI Assistant Configuration">
 
               <s-block-stack gap="300">
                 <s-block-stack gap="100">
@@ -624,16 +603,10 @@ The store you're representing is: ${shop}`}
                   Delete & Recreate Assistant
                 </s-button>
               </s-block-stack>
-            </s-block-stack>
-          </s-card>
+          </s-section>
         )}
 
-        <s-card>
-          <s-block-stack gap="400">
-            <s-block-stack gap="200">
-              <s-text variant="headingMd" as="h2">
-                Phone Number
-              </s-text>
+        <s-section heading="Phone Number">
               {phoneNumber ? (
                 <s-text tone="subdued">
                   Your provisioned phone number is active and ready to receive calls
@@ -697,14 +670,9 @@ The store you're representing is: ${shop}`}
                 )}
               </s-block-stack>
             )}
-          </s-block-stack>
-        </s-card>
+        </s-section>
 
-        <s-card>
-          <s-block-stack gap="300">
-            <s-text variant="headingMd" as="h2">
-              How it works
-            </s-text>
+        <s-section heading="How it works">
             <s-block-stack gap="200">
               <s-text as="p">
                 When you provision a phone number, customers can call your AI receptionist 24/7
@@ -715,8 +683,7 @@ The store you're representing is: ${shop}`}
                 find products, check availability, and answer common questions about your store.
               </s-text>
             </s-block-stack>
-          </s-block-stack>
-        </s-card>
+        </s-section>
       </s-block-stack>
       </s-page>
     </>
