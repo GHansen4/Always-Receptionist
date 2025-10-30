@@ -250,6 +250,40 @@ The store you're representing is: ${session.shop}`;
       return { success: true };
     }
 
+    if (action === "delete_assistant") {
+      const vapiConfig = await prisma.vapiConfig.findUnique({
+        where: { shop: session.shop }
+      });
+
+      if (vapiConfig?.assistantId) {
+        // Call VAPI API to delete the assistant
+        try {
+          await fetch(`https://api.vapi.ai/assistant/${vapiConfig.assistantId}`, {
+            method: "DELETE",
+            headers: {
+              "Authorization": `Bearer ${process.env.VAPI_PRIVATE_KEY}`,
+            }
+          });
+          console.log("✅ Assistant deleted from VAPI");
+        } catch (deleteError) {
+          console.log("⚠️ Error deleting from VAPI:", deleteError.message);
+        }
+
+        // Update database
+        await prisma.vapiConfig.update({
+          where: { shop: session.shop },
+          data: {
+            assistantId: null,
+          }
+        });
+      }
+
+      return {
+        success: true,
+        message: "Assistant deleted. You can now create a new one."
+      };
+    }
+
     return { success: false, error: "Invalid action" };
 
   } catch (error) {
@@ -292,6 +326,14 @@ export default function PhoneNumbers() {
     if (confirm("Are you sure you want to release this phone number? This cannot be undone.")) {
       const formData = new FormData();
       formData.append("action", "release");
+      submit(formData, { method: "post" });
+    }
+  };
+
+  const handleDeleteAssistant = () => {
+    if (confirm("Are you sure you want to delete this assistant? This will allow you to create a new one with different settings.")) {
+      const formData = new FormData();
+      formData.append("action", "delete_assistant");
       submit(formData, { method: "post" });
     }
   };
@@ -614,6 +656,22 @@ The store you're representing is: ${shop}`}
                     <s-text variant="bodyMd" as="p">{assistant.model.model}</s-text>
                   </s-block-stack>
                 )}
+              </s-block-stack>
+
+              <s-divider />
+
+              <s-block-stack gap="200">
+                <s-text tone="subdued" as="p">
+                  Want to change your assistant's settings? Delete the current assistant and create a new one with custom configuration.
+                </s-text>
+                <s-button
+                  tone="critical"
+                  onClick={handleDeleteAssistant}
+                  loading={isLoading}
+                  disabled={isLoading}
+                >
+                  Delete & Recreate Assistant
+                </s-button>
               </s-block-stack>
             </s-block-stack>
           </s-card>
