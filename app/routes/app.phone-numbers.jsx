@@ -397,174 +397,72 @@ export default function PhoneNumbers() {
               ) : (
                 <form onSubmit={handleCreateAssistant}>
                   <s-block-stack gap="400">
-                    <s-block-stack gap="200">
-                      <label htmlFor="assistantName">
-                        <s-text variant="bodyMd" as="span">Assistant Name</s-text>
-                      </label>
-                      <input
-                        id="assistantName"
-                        name="assistantName"
-                        type="text"
-                        defaultValue={`${shopName} Receptionist`}
-                        placeholder="My Store Receptionist"
-                        maxLength="40"
-                        style={{
-                          width: '100%',
-                          padding: '8px 12px',
-                          border: '1px solid #c4cdd5',
-                          borderRadius: '4px',
-                          fontSize: '14px',
-                        }}
-                      />
-                      <s-text variant="bodySm" tone="subdued">Maximum 40 characters</s-text>
-                    </s-block-stack>
+                    <s-text-field
+                      label="Assistant Name"
+                      name="assistantName"
+                      value={`${shopName} Receptionist`}
+                      max-length="40"
+                      help-text="Maximum 40 characters"
+                    />
 
-                    <s-block-stack gap="200">
-                      <label htmlFor="voiceProvider">
-                        <s-text variant="bodyMd" as="span">Voice Provider</s-text>
-                      </label>
-                      <select
-                        id="voiceProvider"
-                        name="voiceProvider"
-                        defaultValue="openai"
-                        style={{
-                          width: '100%',
-                          padding: '8px 12px',
-                          border: '1px solid #c4cdd5',
-                          borderRadius: '4px',
-                          fontSize: '14px',
-                        }}
-                      >
-                        <option value="openai">OpenAI</option>
-                        <option value="11labs">ElevenLabs</option>
-                        <option value="playht">PlayHT</option>
-                      </select>
-                    </s-block-stack>
+                    <s-select
+                      label="Voice Provider"
+                      name="voiceProvider"
+                      value="openai"
+                    >
+                      <option value="openai">OpenAI</option>
+                      <option value="11labs">ElevenLabs</option>
+                      <option value="playht">PlayHT</option>
+                    </s-select>
 
-                    <s-block-stack gap="200">
-                      <label htmlFor="voiceId">
-                        <s-text variant="bodyMd" as="span">Voice ID</s-text>
-                      </label>
-                      <input
-                        id="voiceId"
-                        name="voiceId"
-                        type="text"
-                        defaultValue="echo"
-                        placeholder="echo, ash, alloy, etc."
-                        style={{
-                          width: '100%',
-                          padding: '8px 12px',
-                          border: '1px solid #c4cdd5',
-                          borderRadius: '4px',
-                          fontSize: '14px',
-                        }}
-                      />
-                      <s-text variant="bodySm" tone="subdued">
-                        For OpenAI: alloy, echo, fable, onyx, nova, shimmer
-                      </s-text>
-                    </s-block-stack>
+                    <s-text-field
+                      label="Voice ID"
+                      name="voiceId"
+                      value="echo"
+                      help-text="For OpenAI: alloy, echo, fable, onyx, nova, shimmer"
+                    />
 
-                    <s-block-stack gap="200">
-                      <label htmlFor="model">
-                        <s-text variant="bodyMd" as="span">AI Model</s-text>
-                      </label>
-                      <select
-                        id="model"
-                        name="model"
-                        defaultValue="gpt-4o"
-                        style={{
-                          width: '100%',
-                          padding: '8px 12px',
-                          border: '1px solid #c4cdd5',
-                          borderRadius: '4px',
-                          fontSize: '14px',
-                        }}
-                      >
-                        <option value="gpt-4o">GPT-4o (Recommended)</option>
-                        <option value="gpt-4o-mini">GPT-4o Mini (Faster, cheaper)</option>
-                        <option value="gpt-4-turbo">GPT-4 Turbo</option>
-                        <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Cheapest)</option>
-                      </select>
-                    </s-block-stack>
+                    <s-select
+                      label="AI Model"
+                      name="model"
+                      value="gpt-4o"
+                    >
+                      <option value="gpt-4o">GPT-4o (Recommended)</option>
+                      <option value="gpt-4o-mini">GPT-4o Mini (Faster, cheaper)</option>
+                      <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                      <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Cheapest)</option>
+                    </s-select>
 
-                    <s-block-stack gap="200">
-                      <label htmlFor="temperature">
-                        <s-text variant="bodyMd" as="span">Temperature (Creativity)</s-text>
-                      </label>
-                      <input
-                        id="temperature"
-                        name="temperature"
-                        type="number"
-                        min="0"
-                        max="1"
-                        step="0.1"
-                        defaultValue="0.7"
-                        style={{
-                          width: '100%',
-                          padding: '8px 12px',
-                          border: '1px solid #c4cdd5',
-                          borderRadius: '4px',
-                          fontSize: '14px',
-                        }}
-                      />
-                      <s-text variant="bodySm" tone="subdued">
-                        0 = More focused, 1 = More creative
-                      </s-text>
-                    </s-block-stack>
+                    <s-text-field
+                      label="Temperature (Creativity)"
+                      name="temperature"
+                      type="number"
+                      value="0.7"
+                      min="0"
+                      max="1"
+                      step="0.1"
+                      help-text="0 = More focused, 1 = More creative"
+                    />
 
-                    <s-block-stack gap="200">
-                      <label htmlFor="firstMessage">
-                        <s-text variant="bodyMd" as="span">First Message</s-text>
-                      </label>
-                      <input
-                        id="firstMessage"
-                        name="firstMessage"
-                        type="text"
-                        defaultValue="Hi! Thanks for calling. How can I help you today?"
-                        style={{
-                          width: '100%',
-                          padding: '8px 12px',
-                          border: '1px solid #c4cdd5',
-                          borderRadius: '4px',
-                          fontSize: '14px',
-                        }}
-                      />
-                      <s-text variant="bodySm" tone="subdued">
-                        What the assistant says when answering the call
-                      </s-text>
-                    </s-block-stack>
+                    <s-text-field
+                      label="First Message"
+                      name="firstMessage"
+                      value="Hi! Thanks for calling. How can I help you today?"
+                      help-text="What the assistant says when answering the call"
+                    />
 
-                    <s-block-stack gap="200">
-                      <label htmlFor="endCallMessage">
-                        <s-text variant="bodyMd" as="span">End Call Message</s-text>
-                      </label>
-                      <input
-                        id="endCallMessage"
-                        name="endCallMessage"
-                        type="text"
-                        defaultValue="Thanks for calling! Have a great day!"
-                        style={{
-                          width: '100%',
-                          padding: '8px 12px',
-                          border: '1px solid #c4cdd5',
-                          borderRadius: '4px',
-                          fontSize: '14px',
-                        }}
-                      />
-                      <s-text variant="bodySm" tone="subdued">
-                        What the assistant says before hanging up
-                      </s-text>
-                    </s-block-stack>
+                    <s-text-field
+                      label="End Call Message"
+                      name="endCallMessage"
+                      value="Thanks for calling! Have a great day!"
+                      help-text="What the assistant says before hanging up"
+                    />
 
-                    <s-block-stack gap="200">
-                      <label htmlFor="systemPrompt">
-                        <s-text variant="bodyMd" as="span">System Prompt (Instructions)</s-text>
-                      </label>
-                      <textarea
-                        id="systemPrompt"
-                        name="systemPrompt"
-                        rows="8"
-                        defaultValue={`You are a friendly AI receptionist for an online store.
+                    <s-text-field
+                      label="System Prompt (Instructions)"
+                      name="systemPrompt"
+                      multiline="8"
+                      value={`You are a friendly AI receptionist for an online store.
 
 Your role:
 - Answer questions about products and inventory
@@ -577,20 +475,8 @@ Important rules:
 - If you don't know something, be honest and offer to transfer to a human
 
 The store you're representing is: ${shop}`}
-                        style={{
-                          width: '100%',
-                          padding: '8px 12px',
-                          border: '1px solid #c4cdd5',
-                          borderRadius: '4px',
-                          fontSize: '14px',
-                          fontFamily: 'monospace',
-                          resize: 'vertical',
-                        }}
-                      />
-                      <s-text variant="bodySm" tone="subdued">
-                        Instructions that define how the assistant behaves
-                      </s-text>
-                    </s-block-stack>
+                      help-text="Instructions that define how the assistant behaves"
+                    />
 
                     <s-inline-stack gap="200">
                       <s-button
@@ -631,15 +517,15 @@ The store you're representing is: ${shop}`}
               <s-block-stack gap="300">
                 <s-block-stack gap="100">
                   <s-text variant="bodySm" tone="subdued">Assistant Name</s-text>
-                  <s-text variant="bodyMd" as="p">{assistant.name}</s-text>
+                  <s-text variant="bodyMd" as="p">{assistant?.name}</s-text>
                 </s-block-stack>
 
                 <s-block-stack gap="100">
                   <s-text variant="bodySm" tone="subdued">Assistant ID</s-text>
-                  <s-text variant="bodySm" as="p">{assistant.id}</s-text>
+                  <s-text variant="bodySm" as="p">{assistant?.id}</s-text>
                 </s-block-stack>
 
-                {assistant.voice && (
+                {assistant?.voice && (
                   <>
                     <s-block-stack gap="100">
                       <s-text variant="bodySm" tone="subdued">Voice Provider</s-text>
@@ -653,7 +539,7 @@ The store you're representing is: ${shop}`}
                   </>
                 )}
 
-                {assistant.model && (
+                {assistant?.model && (
                   <s-block-stack gap="100">
                     <s-text variant="bodySm" tone="subdued">AI Model</s-text>
                     <s-text variant="bodyMd" as="p">{assistant.model.model}</s-text>
@@ -739,7 +625,7 @@ The store you're representing is: ${shop}`}
                   disabled={isLoading || !hasAssistant}
                   size="large"
                 >
-                  Provision Phone Number!!!
+                  Provision Phone Number
                 </s-button>
 
                 {!hasAssistant && (
