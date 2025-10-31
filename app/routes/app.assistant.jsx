@@ -207,7 +207,6 @@ export default function Assistant() {
   const isLoading = navigation.state !== "idle";
 
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const handleCreateAssistant = (event) => {
     event.preventDefault();
@@ -297,54 +296,12 @@ Important: Never make up product information - always use the get_products tool.
                     help-text="Tell the assistant about your business and how to help customers"
                   />
 
-                  {/* Advanced Section (Collapsible) */}
-                  <s-stack direction="block" gap="base">
-                    <s-button
-                      type="button"
-                      onClick={() => setShowAdvanced(!showAdvanced)}
-                      variant="plain"
-                    >
-                      {showAdvanced ? '▼' : '▶'} Advanced Settings
-                    </s-button>
-
-                    {showAdvanced && (
-                      <s-stack direction="block" gap="large">
-                        <s-select
-                          label="Response Speed"
-                          name="model"
-                          value="gpt-4o-mini"
-                        >
-                          <option value="gpt-4o-mini">Faster (GPT-4o Mini)</option>
-                          <option value="gpt-4o">Balanced (GPT-4o)</option>
-                          <option value="gpt-4-turbo">Comprehensive (GPT-4 Turbo)</option>
-                        </s-select>
-
-                        <s-select
-                          label="Interruption Handling"
-                          name="temperature"
-                          value="0.7"
-                        >
-                          <option value="0.3">More Focused (Less likely to be interrupted)</option>
-                          <option value="0.7">Balanced</option>
-                          <option value="1.0">More Creative (May allow more interruptions)</option>
-                        </s-select>
-
-                        <s-select
-                          label="Voicemail Detection"
-                          name="voicemailEnabled"
-                          value="false"
-                        >
-                          <option value="false">Disabled</option>
-                          <option value="true">Enabled (Detect and handle voicemail)</option>
-                        </s-select>
-                      </s-stack>
-                    )}
-                  </s-stack>
-
                   {/* Hidden fields for defaults */}
                   <input type="hidden" name="voiceProvider" value="openai" />
                   <input type="hidden" name="assistantName" value={`${shopName} Receptionist`} />
                   <input type="hidden" name="endCallMessage" value="Thanks for calling! Have a great day!" />
+                  <input type="hidden" name="model" value="gpt-4o-mini" />
+                  <input type="hidden" name="temperature" value="0.7" />
 
                   <s-stack direction="inline" gap="base">
                     <s-button
