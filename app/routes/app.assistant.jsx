@@ -425,13 +425,14 @@ export default function Assistant() {
                   <s-select
                     label="Voice Selection"
                     name="voiceId"
+                    value="echo"
                   >
-                    <option value="alloy">Alloy (Neutral)</option>
-                    <option value="echo" selected>Echo (Male)</option>
-                    <option value="fable">Fable (British Male)</option>
-                    <option value="onyx">Onyx (Deep Male)</option>
-                    <option value="nova">Nova (Female)</option>
-                    <option value="shimmer">Shimmer (Soft Female)</option>
+                    <s-option value="alloy">Alloy (Neutral)</s-option>
+                    <s-option value="echo">Echo (Male)</s-option>
+                    <s-option value="fable">Fable (British Male)</s-option>
+                    <s-option value="onyx">Onyx (Deep Male)</s-option>
+                    <s-option value="nova">Nova (Female)</s-option>
+                    <s-option value="shimmer">Shimmer (Soft Female)</s-option>
                   </s-select>
 
                   <s-text-field
@@ -525,13 +526,14 @@ Important: Never make up product information - always use the get_products tool.
                   <s-select
                     label="Voice Selection"
                     name="voiceId"
+                    value={assistant?.voice?.voiceId || "echo"}
                   >
-                    <option value="alloy" selected={assistant?.voice?.voiceId === "alloy"}>Alloy (Neutral)</option>
-                    <option value="echo" selected={assistant?.voice?.voiceId === "echo"}>Echo (Male)</option>
-                    <option value="fable" selected={assistant?.voice?.voiceId === "fable"}>Fable (British Male)</option>
-                    <option value="onyx" selected={assistant?.voice?.voiceId === "onyx"}>Onyx (Deep Male)</option>
-                    <option value="nova" selected={assistant?.voice?.voiceId === "nova"}>Nova (Female)</option>
-                    <option value="shimmer" selected={assistant?.voice?.voiceId === "shimmer"}>Shimmer (Soft Female)</option>
+                    <s-option value="alloy">Alloy (Neutral)</s-option>
+                    <s-option value="echo">Echo (Male)</s-option>
+                    <s-option value="fable">Fable (British Male)</s-option>
+                    <s-option value="onyx">Onyx (Deep Male)</s-option>
+                    <s-option value="nova">Nova (Female)</s-option>
+                    <s-option value="shimmer">Shimmer (Soft Female)</s-option>
                   </s-select>
 
                   <s-text-field
@@ -575,13 +577,14 @@ Important: Never make up product information - always use the get_products tool.
                 <s-select
                   label="Select Phone Number"
                   name="phoneNumberId"
+                  value={phoneNumbers.find(p => p.assistantId === assistant?.id)?.id || ""}
                 >
-                  <option value="">Choose a phone number</option>
+                  <s-option value="">Choose a phone number</s-option>
                   {phoneNumbers.map((phone) => (
-                    <option key={phone.id} value={phone.id}>
+                    <s-option key={phone.id} value={phone.id}>
                       {phone.number || phone.name || phone.id}
                       {phone.assistantId === assistant?.id ? ' (Currently associated)' : ''}
-                    </option>
+                    </s-option>
                   ))}
                 </s-select>
 
