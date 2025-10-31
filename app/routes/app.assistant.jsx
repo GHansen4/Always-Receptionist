@@ -396,17 +396,6 @@ The store you're representing is: ${shop}`}
             </s-stack>
           </s-section>
         )}
-
-        <s-section heading="How it works">
-          <s-stack direction="block" gap="base">
-            <s-text as="p">
-              Your AI assistant uses VAPI to handle phone calls. Once configured, it can answer customer questions 24/7.
-            </s-text>
-            <s-text as="p" tone="subdued">
-              The assistant has access to your product catalog through the get_products tool and can help customers find products, check availability, and answer common questions.
-            </s-text>
-          </s-stack>
-        </s-section>
       </s-block-stack>
     </s-page>
   );
