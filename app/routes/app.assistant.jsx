@@ -21,6 +21,7 @@ export async function loader({ request }) {
     });
 
     let assistant = null;
+    let phoneNumbers = [];
 
     // Fetch assistant details from VAPI if we have an assistantId
     if (vapiConfig?.assistantId) {
@@ -40,9 +41,26 @@ export async function loader({ request }) {
       }
     }
 
+    // Fetch phone numbers from VAPI
+    try {
+      const phoneResponse = await fetch("https://api.vapi.ai/phone-number", {
+        headers: {
+          'Authorization': `Bearer ${process.env.VAPI_PRIVATE_KEY}`
+        }
+      });
+
+      if (phoneResponse.ok) {
+        phoneNumbers = await phoneResponse.json();
+        console.log("✅ Fetched phone numbers:", phoneNumbers.length);
+      }
+    } catch (phoneError) {
+      console.log("⚠️ Error fetching phone numbers:", phoneError.message);
+    }
+
     return {
       hasAssistant: !!vapiConfig?.assistantId,
       assistant,
+      phoneNumbers,
       shop: session.shop,
     };
   } catch (error) {
@@ -245,6 +263,57 @@ The store you're representing is: ${session.shop}`;
       };
     }
 
+    if (action === "associate_phone") {
+      console.log("Associating phone number with assistant...");
+
+      const vapiConfig = await prisma.vapiConfig.findUnique({
+        where: { shop: session.shop }
+      });
+
+      if (!vapiConfig?.assistantId) {
+        return {
+          success: false,
+          error: "No assistant found to associate"
+        };
+      }
+
+      const phoneNumberId = formData.get("phoneNumberId");
+
+      if (!phoneNumberId) {
+        return {
+          success: false,
+          error: "Please select a phone number"
+        };
+      }
+
+      const response = await fetch(`https://api.vapi.ai/phone-number/${phoneNumberId}`, {
+        method: "PATCH",
+        headers: {
+          "Authorization": `Bearer ${process.env.VAPI_PRIVATE_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          assistantId: vapiConfig.assistantId
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("VAPI API error:", errorText);
+        return {
+          success: false,
+          error: `Failed to associate phone number: ${errorText}`
+        };
+      }
+
+      console.log("✅ Phone number associated successfully");
+
+      return {
+        success: true,
+        message: "Phone number associated with assistant successfully!"
+      };
+    }
+
     return { success: false, error: "Invalid action" };
 
   } catch (error) {
@@ -260,7 +329,7 @@ The store you're representing is: ${session.shop}`;
 }
 
 export default function Assistant() {
-  const { hasAssistant, assistant, shop } = useLoaderData();
+  const { hasAssistant, assistant, phoneNumbers, shop } = useLoaderData();
   const actionData = useActionData();
   const submit = useSubmit();
   const navigation = useNavigation();
@@ -299,6 +368,14 @@ export default function Assistant() {
       formData.append("action", "delete_assistant");
       submit(formData, { method: "post" });
     }
+  };
+
+  const handleAssociatePhone = (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    formData.append("action", "associate_phone");
+    submit(formData, { method: "post" });
   };
 
   const shopName = shop?.replace('.myshopify.com', '') || '';
@@ -484,6 +561,47 @@ Important: Never make up product information - always use the get_products tool.
                 </s-stack>
               </form>
             )}
+          </s-section>
+        )}
+
+        {hasAssistant && phoneNumbers && phoneNumbers.length > 0 && (
+          <s-section heading="Phone Number">
+            <s-text as="p">
+              Associate your assistant with a phone number from your VAPI account.
+            </s-text>
+
+            <form onSubmit={handleAssociatePhone}>
+              <s-stack direction="block" gap="base">
+                <s-select
+                  label="Select Phone Number"
+                  name="phoneNumberId"
+                >
+                  <option value="">Choose a phone number</option>
+                  {phoneNumbers.map((phone) => (
+                    <option key={phone.id} value={phone.id}>
+                      {phone.number || phone.name || phone.id}
+                      {phone.assistantId === assistant?.id ? ' (Currently associated)' : ''}
+                    </option>
+                  ))}
+                </s-select>
+
+                <s-button
+                  type="submit"
+                  variant="primary"
+                  {...(isLoading ? { loading: true } : {})}
+                >
+                  Associate Phone Number
+                </s-button>
+              </s-stack>
+            </form>
+          </s-section>
+        )}
+
+        {hasAssistant && phoneNumbers && phoneNumbers.length === 0 && (
+          <s-section heading="Phone Number">
+            <s-banner tone="info">
+              <p>No phone numbers found in your VAPI account. Please create a phone number in VAPI first.</p>
+            </s-banner>
           </s-section>
         )}
       </s-block-stack>
