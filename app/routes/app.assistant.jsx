@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLoaderData, useSubmit, useNavigation, useActionData } from "react-router";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
@@ -185,6 +185,66 @@ The store you're representing is: ${session.shop}`;
       };
     }
 
+    if (action === "update_assistant") {
+      console.log("Updating VAPI assistant...");
+
+      const vapiConfig = await prisma.vapiConfig.findUnique({
+        where: { shop: session.shop }
+      });
+
+      if (!vapiConfig?.assistantId) {
+        return {
+          success: false,
+          error: "No assistant found to update"
+        };
+      }
+
+      // Get form data
+      const firstMessage = formData.get("firstMessage");
+      const voiceId = formData.get("voiceId");
+      const systemPrompt = formData.get("systemPrompt");
+
+      // Build update payload
+      const payload = {
+        voice: {
+          provider: "openai",
+          voiceId: voiceId,
+        },
+        firstMessage: firstMessage,
+        model: {
+          provider: "openai",
+          model: "gpt-4o-mini",
+          temperature: 0.7,
+          systemPrompt: systemPrompt,
+        },
+      };
+
+      const response = await fetch(`https://api.vapi.ai/assistant/${vapiConfig.assistantId}`, {
+        method: "PATCH",
+        headers: {
+          "Authorization": `Bearer ${process.env.VAPI_PRIVATE_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("VAPI API error:", errorText);
+        return {
+          success: false,
+          error: `Failed to update assistant: ${errorText}`
+        };
+      }
+
+      console.log("✅ Assistant updated successfully");
+
+      return {
+        success: true,
+        message: "Assistant settings updated successfully!"
+      };
+    }
+
     return { success: false, error: "Invalid action" };
 
   } catch (error) {
@@ -207,12 +267,29 @@ export default function Assistant() {
   const isLoading = navigation.state !== "idle";
 
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
+
+  // Close forms on successful action
+  useEffect(() => {
+    if (actionData?.success) {
+      setShowCreateForm(false);
+      setShowEditForm(false);
+    }
+  }, [actionData]);
 
   const handleCreateAssistant = (event) => {
     event.preventDefault();
     const form = event.currentTarget;
     const formData = new FormData(form);
     formData.append("action", "create_assistant");
+    submit(formData, { method: "post" });
+  };
+
+  const handleUpdateAssistant = (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    formData.append("action", "update_assistant");
     submit(formData, { method: "post" });
   };
 
@@ -325,40 +402,90 @@ Important: Never make up product information - always use the get_products tool.
           </s-section>
         ) : (
           <s-section heading="AI Assistant Configuration">
-            <s-stack direction="block" gap="base">
-              <s-text as="p">
-                <strong>Assistant Name:</strong> {assistant?.name || 'Loading...'}
-              </s-text>
+            {!showEditForm ? (
+              <s-stack direction="block" gap="base">
+                <s-text as="p">
+                  <strong>Greeting Message:</strong> {assistant?.firstMessage || 'Not set'}
+                </s-text>
 
-              {assistant?.voice && (
-                <>
-                  <s-text as="p">
-                    <strong>Voice Provider:</strong> {assistant.voice.provider}
-                  </s-text>
+                {assistant?.voice && (
                   <s-text as="p">
                     <strong>Voice:</strong> {assistant.voice.voiceId}
                   </s-text>
-                </>
-              )}
+                )}
 
-              {assistant?.model && (
-                <s-text as="p">
-                  <strong>AI Model:</strong> {assistant.model.model}
-                </s-text>
-              )}
+                {assistant?.model && (
+                  <s-text as="p">
+                    <strong>About Your Business:</strong> {assistant.model.systemPrompt?.substring(0, 100)}...
+                  </s-text>
+                )}
 
-              <s-text tone="subdued" as="p">
-                Want to change settings? Delete this assistant and create a new one with different configuration.
-              </s-text>
+                <s-stack direction="inline" gap="base">
+                  <s-button
+                    variant="primary"
+                    onClick={() => setShowEditForm(true)}
+                  >
+                    Edit Settings
+                  </s-button>
+                  <s-button
+                    tone="critical"
+                    onClick={handleDeleteAssistant}
+                    {...(isLoading ? { loading: true } : {})}
+                  >
+                    Delete Assistant
+                  </s-button>
+                </s-stack>
+              </s-stack>
+            ) : (
+              <form onSubmit={handleUpdateAssistant}>
+                <s-stack direction="block" gap="large">
+                  <s-text-field
+                    label="Greeting Message"
+                    name="firstMessage"
+                    value={assistant?.firstMessage || ""}
+                    help-text="What the assistant says when answering the call"
+                  />
 
-              <s-button
-                tone="critical"
-                onClick={handleDeleteAssistant}
-                {...(isLoading ? { loading: true } : {})}
-              >
-                Delete Assistant
-              </s-button>
-            </s-stack>
+                  <s-select
+                    label="Voice Selection"
+                    name="voiceId"
+                    value={assistant?.voice?.voiceId || "echo"}
+                  >
+                    <option value="alloy">Alloy (Neutral)</option>
+                    <option value="echo">Echo (Male)</option>
+                    <option value="fable">Fable (British Male)</option>
+                    <option value="onyx">Onyx (Deep Male)</option>
+                    <option value="nova">Nova (Female)</option>
+                    <option value="shimmer">Shimmer (Soft Female)</option>
+                  </s-select>
+
+                  <s-text-field
+                    label="About Your Business"
+                    name="systemPrompt"
+                    multiline="6"
+                    value={assistant?.model?.systemPrompt || ""}
+                    help-text="Tell the assistant about your business and how to help customers"
+                  />
+
+                  <s-stack direction="inline" gap="base">
+                    <s-button
+                      type="submit"
+                      variant="primary"
+                      {...(isLoading ? { loading: true } : {})}
+                    >
+                      Save Changes
+                    </s-button>
+                    <s-button
+                      type="button"
+                      onClick={() => setShowEditForm(false)}
+                      disabled={isLoading}
+                    >
+                      Cancel
+                    </s-button>
+                  </s-stack>
+                </s-stack>
+              </form>
+            )}
           </s-section>
         )}
       </s-block-stack>
