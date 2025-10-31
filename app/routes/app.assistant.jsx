@@ -258,85 +258,50 @@ export default function Assistant() {
             ) : (
               <form onSubmit={handleCreateAssistant}>
                 <s-stack direction="block" gap="large">
-                  <s-text-field
-                    label="Assistant Name"
-                    name="assistantName"
-                    value={`${shopName} Receptionist`}
-                    help-text="Maximum 40 characters"
-                  />
-
-                  <s-select
-                    label="Voice Provider"
-                    name="voiceProvider"
-                    value="openai"
-                  >
-                    <option value="openai">OpenAI</option>
-                    <option value="11labs">ElevenLabs</option>
-                    <option value="playht">PlayHT</option>
-                  </s-select>
+                  {/* Step 1: Basic Setup */}
+                  <s-text variant="headingSm" as="h3">Step 1: Basic Setup</s-text>
 
                   <s-text-field
-                    label="Voice ID"
-                    name="voiceId"
-                    value="echo"
-                    help-text="For OpenAI: alloy, echo, fable, onyx, nova, shimmer"
-                  />
-
-                  <s-select
-                    label="AI Model"
-                    name="model"
-                    value="gpt-4o"
-                  >
-                    <option value="gpt-4o">GPT-4o (Recommended)</option>
-                    <option value="gpt-4o-mini">GPT-4o Mini (Faster, cheaper)</option>
-                    <option value="gpt-4-turbo">GPT-4 Turbo</option>
-                    <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Cheapest)</option>
-                  </s-select>
-
-                  <s-text-field
-                    label="Temperature (Creativity)"
-                    name="temperature"
-                    type="number"
-                    value="0.7"
-                    min="0"
-                    max="1"
-                    step="0.1"
-                    help-text="0 = More focused, 1 = More creative"
-                  />
-
-                  <s-text-field
-                    label="First Message"
+                    label="Greeting Message"
                     name="firstMessage"
                     value="Hi! Thanks for calling. How can I help you today?"
                     help-text="What the assistant says when answering the call"
                   />
 
-                  <s-text-field
-                    label="End Call Message"
-                    name="endCallMessage"
-                    value="Thanks for calling! Have a great day!"
-                    help-text="What the assistant says before hanging up"
-                  />
+                  <s-select
+                    label="Voice Selection"
+                    name="voiceId"
+                    value="echo"
+                  >
+                    <option value="alloy">Alloy (Neutral)</option>
+                    <option value="echo">Echo (Male)</option>
+                    <option value="fable">Fable (British Male)</option>
+                    <option value="onyx">Onyx (Deep Male)</option>
+                    <option value="nova">Nova (Female)</option>
+                    <option value="shimmer">Shimmer (Soft Female)</option>
+                  </s-select>
 
                   <s-text-field
-                    label="System Prompt (Instructions)"
+                    label="About Your Business"
                     name="systemPrompt"
-                    multiline="8"
-                    value={`You are a friendly AI receptionist for an online store.
+                    multiline="6"
+                    value={`You are a friendly AI receptionist for ${shopName}.
 
 Your role:
 - Answer questions about products and inventory
 - Help customers find what they're looking for
 - Be helpful, professional, and concise
 
-Important rules:
-- Never make up product information - always use the get_products tool
-- Keep responses brief and conversational (this is a phone call)
-- If you don't know something, be honest and offer to transfer to a human
-
-The store you're representing is: ${shop}`}
-                    help-text="Instructions that define how the assistant behaves"
+Important: Never make up product information - always use the get_products tool.`}
+                    help-text="Tell the assistant about your business and how to help customers"
                   />
+
+                  {/* Hidden fields for defaults */}
+                  <input type="hidden" name="voiceProvider" value="openai" />
+                  <input type="hidden" name="assistantName" value={`${shopName} Receptionist`} />
+                  <input type="hidden" name="endCallMessage" value="Thanks for calling! Have a great day!" />
+                  <input type="hidden" name="model" value="gpt-4o-mini" />
+                  <input type="hidden" name="temperature" value="0.7" />
 
                   <s-stack direction="inline" gap="base">
                     <s-button
@@ -396,17 +361,6 @@ The store you're representing is: ${shop}`}
             </s-stack>
           </s-section>
         )}
-
-        <s-section heading="How it works">
-          <s-stack direction="block" gap="base">
-            <s-text as="p">
-              Your AI assistant uses VAPI to handle phone calls. Once configured, it can answer customer questions 24/7.
-            </s-text>
-            <s-text as="p" tone="subdued">
-              The assistant has access to your product catalog through the get_products tool and can help customers find products, check availability, and answer common questions.
-            </s-text>
-          </s-stack>
-        </s-section>
       </s-block-stack>
     </s-page>
   );
