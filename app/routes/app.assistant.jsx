@@ -130,12 +130,6 @@ The store you're representing is: ${session.shop}`;
           model: model,
           temperature: temperature,
           systemPrompt: systemPrompt,
-          tools: [
-            {
-              type: "function",
-              id: "518d8101-b69f-4494-9fbc-9bc6188886df"
-            }
-          ]
         },
         voice: {
           provider: voiceProvider,
@@ -240,12 +234,6 @@ The store you're representing is: ${session.shop}`;
           model: "gpt-4o-mini",
           temperature: 0.7,
           systemPrompt: systemPrompt,
-          tools: [
-            {
-              type: "function",
-              id: "518d8101-b69f-4494-9fbc-9bc6188886df"
-            }
-          ]
         },
       };
 
