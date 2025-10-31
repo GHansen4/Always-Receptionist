@@ -43,12 +43,6 @@ Important rules:
 - If you don't know something, be honest and offer to transfer to a human
 
 The store you're representing is: ${shop}`,
-      tools: [
-        {
-          type: "function",
-          id: "518d8101-b69f-4494-9fbc-9bc6188886df"
-        }
-      ]
     },
     voice: {
       provider: "openai",
