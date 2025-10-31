@@ -348,10 +348,9 @@ export default function Assistant() {
                   <s-select
                     label="Voice Selection"
                     name="voiceId"
-                    value="echo"
                   >
                     <option value="alloy">Alloy (Neutral)</option>
-                    <option value="echo">Echo (Male)</option>
+                    <option value="echo" selected>Echo (Male)</option>
                     <option value="fable">Fable (British Male)</option>
                     <option value="onyx">Onyx (Deep Male)</option>
                     <option value="nova">Nova (Female)</option>
@@ -449,14 +448,13 @@ Important: Never make up product information - always use the get_products tool.
                   <s-select
                     label="Voice Selection"
                     name="voiceId"
-                    value={assistant?.voice?.voiceId || "echo"}
                   >
-                    <option value="alloy">Alloy (Neutral)</option>
-                    <option value="echo">Echo (Male)</option>
-                    <option value="fable">Fable (British Male)</option>
-                    <option value="onyx">Onyx (Deep Male)</option>
-                    <option value="nova">Nova (Female)</option>
-                    <option value="shimmer">Shimmer (Soft Female)</option>
+                    <option value="alloy" selected={assistant?.voice?.voiceId === "alloy"}>Alloy (Neutral)</option>
+                    <option value="echo" selected={assistant?.voice?.voiceId === "echo"}>Echo (Male)</option>
+                    <option value="fable" selected={assistant?.voice?.voiceId === "fable"}>Fable (British Male)</option>
+                    <option value="onyx" selected={assistant?.voice?.voiceId === "onyx"}>Onyx (Deep Male)</option>
+                    <option value="nova" selected={assistant?.voice?.voiceId === "nova"}>Nova (Female)</option>
+                    <option value="shimmer" selected={assistant?.voice?.voiceId === "shimmer"}>Shimmer (Soft Female)</option>
                   </s-select>
 
                   <s-text-field
