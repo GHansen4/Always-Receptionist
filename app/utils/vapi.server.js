@@ -30,7 +30,7 @@ export async function createVapiAssistant(shop, vapiSignature) {
       provider: "openai",
       model: "gpt-4o",
       temperature: 0.7,
-      systemPrompt: `You are a friendly AI receptionist for an online store. 
+      systemPrompt: `You are a friendly AI receptionist for an online store.
 
 Your role:
 - Answer questions about products and inventory
@@ -43,6 +43,12 @@ Important rules:
 - If you don't know something, be honest and offer to transfer to a human
 
 The store you're representing is: ${shop}`,
+      tools: [
+        {
+          type: "function",
+          id: "518d8101-b69f-4494-9fbc-9bc6188886df"
+        }
+      ]
     },
     voice: {
       provider: "openai",
