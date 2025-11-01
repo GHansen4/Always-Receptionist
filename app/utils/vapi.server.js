@@ -38,11 +38,39 @@ Your role:
 - Be helpful, professional, and concise
 
 Important rules:
-- Never make up product information - always use the get_products tool
+- Never make up product information - always use the getProductInfo tool
 - Keep responses brief and conversational (this is a phone call)
 - If you don't know something, be honest and offer to transfer to a human
 
 The store you're representing is: ${shop}`,
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "getProductInfo",
+            description: "Search for product information in the store's catalog. Use this to look up products, check availability, get pricing, and answer product-related questions.",
+            parameters: {
+              type: "object",
+              properties: {
+                query: {
+                  type: "string",
+                  description: "Product search query (e.g., product name, category, or keywords)"
+                }
+              },
+              required: ["query"]
+            }
+          },
+          server: {
+            url: `https://always-ai-receptionist.vercel.app/api/vapi/products?shop=${shop}`
+          },
+          messages: [
+            {
+              type: "request-start",
+              content: "Let me check our product catalog..."
+            }
+          ]
+        }
+      ]
     },
     voice: {
       provider: "openai",
