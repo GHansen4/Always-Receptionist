@@ -19,6 +19,22 @@ api_version = "2026-01"
   topics = [ "app/scopes_update" ]
   uri = "https://always-receptionist.vercel.app/webhooks/app/scopes_update"
 
+  # GDPR Mandatory Compliance Webhooks
+  # Required for all apps in the Shopify App Store
+  # Reference: https://shopify.dev/docs/apps/build/compliance/privacy-law-compliance
+
+  [[webhooks.subscriptions]]
+  topics = [ "customers/data_request" ]
+  uri = "https://always-receptionist.vercel.app/webhooks/customers/data_request"
+
+  [[webhooks.subscriptions]]
+  topics = [ "customers/redact" ]
+  uri = "https://always-receptionist.vercel.app/webhooks/customers/redact"
+
+  [[webhooks.subscriptions]]
+  topics = [ "shop/redact" ]
+  uri = "https://always-receptionist.vercel.app/webhooks/shop/redact"
+
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
 scopes = "read_products,read_inventory"
