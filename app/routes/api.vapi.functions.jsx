@@ -41,18 +41,33 @@ export async function action({ request }) {
     // Step 1: Parse incoming request
     console.log('Step 1: Parsing request body...');
     const body = await request.json();
-    console.log('Message type:', body?.message?.type);
+    const messageType = body?.message?.type;
+    console.log('Message type:', messageType);
     console.log('Full request body:', JSON.stringify(body, null, 2));
 
-    // VAPI can send toolCalls OR toolCallList - check both
-    console.log('Checking tool call formats...');
-    console.log('  toolCalls:', JSON.stringify(body?.message?.toolCalls, null, 2));
-    console.log('  toolCallList:', JSON.stringify(body?.message?.toolCallList, null, 2));
+    // VAPI sends tool calls embedded in conversation-update messages
+    // Look for tool calls in the messages array (not at top level)
+    console.log('Searching for tool calls in messages array...');
+    const messages = body?.message?.messages || [];
+    const toolCallMessage = messages.find(m => m.role === 'tool_calls');
 
-    // Extract function call details - try both formats
-    const toolCall = body?.message?.toolCallList?.[0] ||
-                     body?.message?.toolCalls?.[0] ||
-                     body?.message?.tool_calls?.[0];
+    console.log('Found tool call message:', !!toolCallMessage);
+    if (toolCallMessage) {
+      console.log('Tool call message details:', JSON.stringify(toolCallMessage, null, 2));
+    }
+
+    // If no tool calls found, this is just a status update - ignore it
+    if (!toolCallMessage) {
+      console.log(`ℹ️ Ignoring message without tool calls (type: ${messageType})`);
+      return Response.json({
+        status: 'ignored',
+        messageType,
+        message: 'No tool calls found in this message'
+      }, { status: 200 });
+    }
+
+    // Extract function call details from the tool call message
+    const toolCall = toolCallMessage.toolCalls?.[0];
     const toolCallId = toolCall?.id;
     const functionName = toolCall?.function?.name;
     const functionArgs = toolCall?.function?.arguments;
