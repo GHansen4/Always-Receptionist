@@ -45,19 +45,45 @@ export async function action({ request }) {
     console.log('Message type:', messageType);
     console.log('Full request body:', JSON.stringify(body, null, 2));
 
-    // VAPI sends tool calls embedded in conversation-update messages
-    // Look for tool calls in the messages array (not at top level)
-    console.log('Searching for tool calls in messages array...');
-    const messages = body?.message?.messages || [];
-    const toolCallMessage = messages.find(m => m.role === 'tool_calls');
+    // VAPI sends tool calls in TWO different formats:
+    // 1. type="tool-calls": toolCalls at TOP level (body.message.toolCalls)
+    // 2. type="conversation-update": toolCalls in messages array with role="tool_calls"
 
-    console.log('Found tool call message:', !!toolCallMessage);
-    if (toolCallMessage) {
-      console.log('Tool call message details:', JSON.stringify(toolCallMessage, null, 2));
+    let toolCall;
+    let toolCallId;
+    let functionName;
+    let functionArgs;
+
+    // Check for top-level toolCalls first (type="tool-calls")
+    if (messageType === 'tool-calls' && (body?.message?.toolCalls || body?.message?.toolCallList)) {
+      console.log('Found top-level tool calls (type=tool-calls)');
+      toolCall = body.message.toolCallList?.[0] || body.message.toolCalls?.[0];
+      toolCallId = toolCall?.id;
+      functionName = toolCall?.function?.name;
+      // Arguments might be an object or a string
+      functionArgs = typeof toolCall?.function?.arguments === 'string'
+        ? toolCall.function.arguments
+        : JSON.stringify(toolCall?.function?.arguments || {});
+
+      console.log('Top-level tool call details:', { toolCallId, functionName, arguments: functionArgs });
+    } else {
+      // Fall back to searching messages array (type="conversation-update")
+      console.log('Searching for tool calls in messages array...');
+      const messages = body?.message?.messages || [];
+      const toolCallMessage = messages.find(m => m.role === 'tool_calls');
+
+      console.log('Found tool call message:', !!toolCallMessage);
+      if (toolCallMessage) {
+        console.log('Tool call message details:', JSON.stringify(toolCallMessage, null, 2));
+        toolCall = toolCallMessage.toolCalls?.[0];
+        toolCallId = toolCall?.id;
+        functionName = toolCall?.function?.name;
+        functionArgs = toolCall?.function?.arguments;
+      }
     }
 
     // If no tool calls found, this is just a status update - ignore it
-    if (!toolCallMessage) {
+    if (!toolCallId || !functionName) {
       console.log(`ℹ️ Ignoring message without tool calls (type: ${messageType})`);
       return Response.json({
         status: 'ignored',
@@ -65,12 +91,6 @@ export async function action({ request }) {
         message: 'No tool calls found in this message'
       }, { status: 200 });
     }
-
-    // Extract function call details from the tool call message
-    const toolCall = toolCallMessage.toolCalls?.[0];
-    const toolCallId = toolCall?.id;
-    const functionName = toolCall?.function?.name;
-    const functionArgs = toolCall?.function?.arguments;
 
     console.log('Function call details:', {
       toolCallId,
