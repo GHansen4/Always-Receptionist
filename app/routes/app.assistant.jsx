@@ -114,12 +114,18 @@ export async function action({ request }) {
 Your role:
 - Answer questions about products and inventory
 - Help customers find what they're looking for
+- Assist with order status inquiries
 - Be helpful, professional, and concise
 
 Important rules:
-- Never make up product information - always use the getProductInfo tool
+- Never make up product information - always use the available tools
 - Keep responses brief and conversational (this is a phone call)
 - If you don't know something, be honest and offer to transfer to a human
+
+Available tools:
+- get_products: List available products in the store
+- search_products: Search for specific products by keyword
+- check_order_status: Look up order information by order number or email
 
 The store you're representing is: ${session.shop}`;
 
@@ -134,26 +140,71 @@ The store you're representing is: ${session.shop}`;
             {
               type: "function",
               function: {
-                name: "getProductInfo",
-                description: "Search for product information in the store's catalog. Use this to look up products, check availability, get pricing, and answer product-related questions.",
+                name: "get_products",
+                description: "Get a list of available products from the store. Use this when customers ask 'what products do you have' or want to browse.",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    limit: {
+                      type: "number",
+                      description: "Maximum number of products to return (default: 10)"
+                    }
+                  }
+                }
+              },
+              messages: [
+                {
+                  type: "request-start",
+                  content: "Let me check what products we have available..."
+                }
+              ]
+            },
+            {
+              type: "function",
+              function: {
+                name: "search_products",
+                description: "Search for products by keyword, name, category, or description. Use this when customers are looking for something specific.",
                 parameters: {
                   type: "object",
                   properties: {
                     query: {
                       type: "string",
-                      description: "Product search query (e.g., product name, category, or keywords)"
+                      description: "Search keyword or phrase (e.g., 'laptop', 'red shoes', 'winter jacket')"
                     }
                   },
                   required: ["query"]
                 }
               },
-              server: {
-                url: `https://always-ai-receptionist.vercel.app/api/vapi/products?shop=${session.shop}`
+              messages: [
+                {
+                  type: "request-start",
+                  content: "Let me search for that..."
+                }
+              ]
+            },
+            {
+              type: "function",
+              function: {
+                name: "check_order_status",
+                description: "Look up order status and details. Use this when customers ask about their order.",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    orderNumber: {
+                      type: "string",
+                      description: "Order number (e.g., '#1001')"
+                    },
+                    email: {
+                      type: "string",
+                      description: "Customer email address"
+                    }
+                  }
+                }
               },
               messages: [
                 {
                   type: "request-start",
-                  content: "Let me check our product catalog..."
+                  content: "Let me look up that order for you..."
                 }
               ]
             }
@@ -165,7 +216,7 @@ The store you're representing is: ${session.shop}`;
         },
         firstMessage: firstMessage,
         endCallMessage: endCallMessage,
-        serverUrl: `https://always-receptionist.vercel.app/api/vapi/products`,
+        serverUrl: `https://always-receptionist.vercel.app/api/vapi/functions`,
         serverUrlSecret: vapiConfig.vapiSignature,
       };
 
@@ -266,31 +317,78 @@ The store you're representing is: ${session.shop}`;
             {
               type: "function",
               function: {
-                name: "getProductInfo",
-                description: "Search for product information in the store's catalog. Use this to look up products, check availability, get pricing, and answer product-related questions.",
+                name: "get_products",
+                description: "Get a list of available products from the store. Use this when customers ask 'what products do you have' or want to browse.",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    limit: {
+                      type: "number",
+                      description: "Maximum number of products to return (default: 10)"
+                    }
+                  }
+                }
+              },
+              messages: [
+                {
+                  type: "request-start",
+                  content: "Let me check what products we have available..."
+                }
+              ]
+            },
+            {
+              type: "function",
+              function: {
+                name: "search_products",
+                description: "Search for products by keyword, name, category, or description. Use this when customers are looking for something specific.",
                 parameters: {
                   type: "object",
                   properties: {
                     query: {
                       type: "string",
-                      description: "Product search query (e.g., product name, category, or keywords)"
+                      description: "Search keyword or phrase (e.g., 'laptop', 'red shoes', 'winter jacket')"
                     }
                   },
                   required: ["query"]
                 }
               },
-              server: {
-                url: `https://always-ai-receptionist.vercel.app/api/vapi/products?shop=${session.shop}`
+              messages: [
+                {
+                  type: "request-start",
+                  content: "Let me search for that..."
+                }
+              ]
+            },
+            {
+              type: "function",
+              function: {
+                name: "check_order_status",
+                description: "Look up order status and details. Use this when customers ask about their order.",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    orderNumber: {
+                      type: "string",
+                      description: "Order number (e.g., '#1001')"
+                    },
+                    email: {
+                      type: "string",
+                      description: "Customer email address"
+                    }
+                  }
+                }
               },
               messages: [
                 {
                   type: "request-start",
-                  content: "Let me check our product catalog..."
+                  content: "Let me look up that order for you..."
                 }
               ]
             }
           ]
         },
+        serverUrl: `https://always-receptionist.vercel.app/api/vapi/functions`,
+        serverUrlSecret: vapiConfig.vapiSignature,
       };
 
       const response = await fetch(`https://api.vapi.ai/assistant/${vapiConfig.assistantId}`, {

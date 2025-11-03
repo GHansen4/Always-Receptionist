@@ -63,16 +63,16 @@ export async function action({ request }) {
       return createErrorResponse('Missing function call information', null);
     }
 
-    // Step 2: Authentication - Validate X-Vapi-Signature header
+    // Step 2: Authentication - Validate X-Vapi-Secret header
     console.log('Step 2: Checking authentication...');
-    const signature = request.headers.get("X-Vapi-Signature");
+    const signature = request.headers.get("X-Vapi-Secret");
     console.log('Signature present:', !!signature);
     if (signature) {
       console.log('Signature (first 20 chars):', signature.substring(0, 20) + '...');
     }
 
     if (!signature) {
-      console.error('❌ Missing X-Vapi-Signature header');
+      console.error('❌ Missing X-Vapi-Secret header');
       console.error('Available headers:', [...request.headers.keys()].join(', '));
       return createErrorResponse('Missing authentication header', toolCallId, 401);
     }
