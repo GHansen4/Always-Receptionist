@@ -41,8 +41,24 @@ export async function action({ request }) {
     // Step 1: Parse incoming request
     console.log('Step 1: Parsing request body...');
     const body = await request.json();
-    console.log('Message type:', body?.message?.type);
+    const messageType = body?.message?.type;
+    console.log('Message type:', messageType);
     console.log('Full request body:', JSON.stringify(body, null, 2));
+
+    // Filter message types - only process actual function calls
+    // VAPI sends multiple message types that should be ignored:
+    // - "conversation-update": Live transcript updates
+    // - "end-of-call-report": Call summary after completion
+    // - "status-update": Status changes
+    // We ONLY care about messages with actual tool calls
+    if (messageType && messageType !== 'tool-calls') {
+      console.log(`ℹ️ Ignoring non-function-call message type: ${messageType}`);
+      return Response.json({
+        status: 'ignored',
+        messageType,
+        message: 'This endpoint only processes function calls'
+      }, { status: 200 });
+    }
 
     // VAPI can send toolCalls OR toolCallList - check both
     console.log('Checking tool call formats...');
