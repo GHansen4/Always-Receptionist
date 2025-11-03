@@ -44,8 +44,15 @@ export async function action({ request }) {
     console.log('Message type:', body?.message?.type);
     console.log('Full request body:', JSON.stringify(body, null, 2));
 
-    // Extract function call details
-    const toolCall = body?.message?.toolCallList?.[0];
+    // VAPI can send toolCalls OR toolCallList - check both
+    console.log('Checking tool call formats...');
+    console.log('  toolCalls:', JSON.stringify(body?.message?.toolCalls, null, 2));
+    console.log('  toolCallList:', JSON.stringify(body?.message?.toolCallList, null, 2));
+
+    // Extract function call details - try both formats
+    const toolCall = body?.message?.toolCallList?.[0] ||
+                     body?.message?.toolCalls?.[0] ||
+                     body?.message?.tool_calls?.[0];
     const toolCallId = toolCall?.id;
     const functionName = toolCall?.function?.name;
     const functionArgs = toolCall?.function?.arguments;
@@ -60,19 +67,21 @@ export async function action({ request }) {
       console.error('❌ Missing function call information');
       console.error('toolCallId:', toolCallId);
       console.error('functionName:', functionName);
+      console.error('Full body:', JSON.stringify(body, null, 2));
       return createErrorResponse('Missing function call information', null);
     }
 
-    // Step 2: Authentication - Validate X-Vapi-Secret header
+    // Step 2: Authentication - Check both X-Vapi-Secret AND X-Vapi-Signature
     console.log('Step 2: Checking authentication...');
-    const signature = request.headers.get("X-Vapi-Secret");
+    const signature = request.headers.get("X-Vapi-Secret") ||
+                      request.headers.get("X-Vapi-Signature");
     console.log('Signature present:', !!signature);
     if (signature) {
       console.log('Signature (first 20 chars):', signature.substring(0, 20) + '...');
     }
 
     if (!signature) {
-      console.error('❌ Missing X-Vapi-Secret header');
+      console.error('❌ Missing X-Vapi-Secret or X-Vapi-Signature header');
       console.error('Available headers:', [...request.headers.keys()].join(', '));
       return createErrorResponse('Missing authentication header', toolCallId, 401);
     }
@@ -112,6 +121,14 @@ export async function action({ request }) {
     console.log('✅ Session found with access token');
     console.log('Session shop:', session.shop);
     console.log('Token scope:', session.scope);
+
+    // Safety check: ensure session has required fields
+    if (!session.shop || !session.accessToken) {
+      console.error('❌ Session is missing required fields');
+      console.error('Has shop:', !!session.shop);
+      console.error('Has accessToken:', !!session.accessToken);
+      return createErrorResponse('Session is invalid or incomplete', toolCallId, 500);
+    }
 
     // Step 5: Execute the requested function
     console.log(`Step 5: Executing function: ${functionName}`);
@@ -163,13 +180,16 @@ export async function action({ request }) {
     console.error('Error type:', error.constructor.name);
     console.error('Error message:', error.message);
     console.error('Error stack:', error.stack);
-    console.error('Full error:', error);
+    console.error('Full error:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
 
     // Try to extract toolCallId for error response
     let toolCallId = 'unknown';
     try {
       const body = await request.clone().json();
-      toolCallId = body?.message?.toolCallList?.[0]?.id || 'unknown';
+      toolCallId = body?.message?.toolCallList?.[0]?.id ||
+                   body?.message?.toolCalls?.[0]?.id ||
+                   body?.message?.tool_calls?.[0]?.id ||
+                   'unknown';
     } catch (parseError) {
       console.error('Failed to parse request for error response:', parseError.message);
     }
