@@ -668,12 +668,8 @@ export default function Assistant() {
                     name="voiceId"
                     value="echo"
                   >
-                    <s-option value="alloy">Alloy (Neutral)</s-option>
-                    <s-option value="echo">Echo (Male)</s-option>
-                    <s-option value="fable">Fable (British Male)</s-option>
-                    <s-option value="onyx">Onyx (Deep Male)</s-option>
-                    <s-option value="nova">Nova (Female)</s-option>
-                    <s-option value="shimmer">Shimmer (Soft Female)</s-option>
+                    <s-option value="kdnRe2koJdOK4Ovxn2DI">Erin</s-option>
+                    <s-option value="vDchjyOZZytffNeZXfZK">Mike</s-option>
                   </s-select>
 
                   <s-text-field
@@ -692,7 +688,7 @@ Important: Never make up product information - always use the getProductInfo too
                   />
 
                   {/* Hidden fields for defaults */}
-                  <input type="hidden" name="voiceProvider" value="openai" />
+                  <input type="hidden" name="voiceProvider" value="11labs" />
                   <input type="hidden" name="assistantName" value={`${shopName} Receptionist`} />
                   <input type="hidden" name="endCallMessage" value="Thanks for calling! Have a great day!" />
                   <input type="hidden" name="model" value="gpt-4o-mini" />
