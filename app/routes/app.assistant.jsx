@@ -71,7 +71,13 @@ export async function loader({ request }) {
     if (error.status === 401 || error.statusCode === 401) {
       throw error;
     }
-    return { error: error.message };
+    return {
+      error: error.message,
+      hasAssistant: false,
+      assistant: null,
+      phoneNumbers: [],
+      shop: null
+    };
   }
 }
 
@@ -434,7 +440,6 @@ The store you're representing is: ${session.shop}`;
         };
       }
 
-      const areaCode = formData.get("areaCode") || null;
       const shopName = session.shop.replace('.myshopify.com', '');
 
       try {
@@ -443,7 +448,6 @@ The store you're representing is: ${session.shop}`;
           provider: "vapi",
           name: `${shopName} - AI Receptionist`,
           assistantId: vapiConfig.assistantId,
-          areaCode: areaCode || undefined
         });
 
         console.log("✅ Phone number created and associated:", phoneNumber.number || phoneNumber.id);
@@ -615,19 +619,37 @@ export default function Assistant() {
         )}
 
         {!hasAssistant ? (
-          <s-section heading="Create AI Assistant">
-            <s-text as="p">
-              Set up your AI assistant to handle customer calls. Configure the voice, behavior, and responses.
-            </s-text>
+          <>
+            <s-banner tone="info">
+              <s-block-stack gap="200">
+                <s-text as="p">
+                  <strong>Setup Steps:</strong>
+                </s-text>
+                <s-text as="p">
+                  1️⃣ Create your AI assistant (configure voice and behavior)
+                </s-text>
+                <s-text as="p">
+                  2️⃣ Create or connect a phone number
+                </s-text>
+                <s-text as="p">
+                  3️⃣ Start receiving calls!
+                </s-text>
+              </s-block-stack>
+            </s-banner>
 
-            {!showCreateForm ? (
-              <s-button
-                variant="primary"
-                size="large"
-                onClick={() => setShowCreateForm(true)}
-              >
-                Create Assistant
-              </s-button>
+            <s-section heading="Create AI Assistant">
+              <s-text as="p">
+                Set up your AI assistant to handle customer calls. Configure the voice, behavior, and responses.
+              </s-text>
+
+              {!showCreateForm ? (
+                <s-button
+                  variant="primary"
+                  size="large"
+                  onClick={() => setShowCreateForm(true)}
+                >
+                  Create Assistant
+                </s-button>
             ) : (
               <form onSubmit={handleCreateAssistant}>
                 <s-stack direction="block" gap="large">
@@ -696,6 +718,7 @@ Important: Never make up product information - always use the getProductInfo too
               </form>
             )}
           </s-section>
+          </>
         ) : (
           <s-section heading="AI Assistant Configuration">
             {!showEditForm ? (
@@ -892,16 +915,9 @@ Important: Never make up product information - always use the getProductInfo too
                   <s-text variant="headingSm" as="h3">Create a New Phone Number</s-text>
 
                   <s-text as="p">
-                    VAPI will provision a new phone number for your AI receptionist.
+                    VAPI will automatically provision a new US phone number for your AI receptionist.
                     This number will be automatically associated with your assistant.
                   </s-text>
-
-                  <s-text-field
-                    label="Preferred Area Code (Optional)"
-                    name="areaCode"
-                    placeholder="e.g., 415, 212, 310"
-                    help-text="Leave blank for automatic assignment. US numbers only."
-                  />
 
                   <s-banner tone="warning">
                     <p><strong>Important:</strong> Phone numbers are billed separately by VAPI. Check VAPI pricing for details.</p>

@@ -234,33 +234,32 @@ export async function listPhoneNumbers() {
  * Create/buy a new phone number via VAPI
  *
  * @param {Object} options - Phone number options
- * @param {string} options.provider - Telephony provider (e.g., "vapi", "twilio", "vonage")
+ * @param {string} options.provider - Telephony provider (e.g., "vapi")
  * @param {string} options.name - Friendly name for the phone number
  * @param {string} options.assistantId - Optional: Auto-associate with assistant
  * @param {string} options.fallbackDestination - Optional: Fallback number if assistant fails
- * @param {string} options.areaCode - Optional: Preferred area code (e.g., "415" for San Francisco)
  * @returns {Object} Created phone number object
  */
 export async function createPhoneNumber({
   provider = "vapi",
   name,
   assistantId = null,
-  fallbackDestination = null,
-  areaCode = null
+  fallbackDestination = null
 }) {
   console.log("📞 Creating new phone number via VAPI...");
   console.log("   Provider:", provider);
   console.log("   Name:", name);
-  console.log("   Area Code:", areaCode || "auto");
   console.log("   Assistant ID:", assistantId || "none");
 
+  // Build minimal payload - VAPI assigns phone number automatically
   const payload = {
     provider,
     ...(name && { name }),
     ...(assistantId && { assistantId }),
-    ...(fallbackDestination && { fallbackDestination }),
-    ...(areaCode && { numberE164CheckEnabled: false, areaCode })
+    ...(fallbackDestination && { fallbackDestination })
   };
+
+  console.log("   Payload:", JSON.stringify(payload, null, 2));
 
   const response = await fetch(`${VAPI_BASE_URL}/phone-number`, {
     method: "POST",
