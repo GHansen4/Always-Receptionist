@@ -440,7 +440,6 @@ The store you're representing is: ${session.shop}`;
         };
       }
 
-      const areaCode = formData.get("areaCode") || null;
       const shopName = session.shop.replace('.myshopify.com', '');
 
       try {
@@ -449,7 +448,6 @@ The store you're representing is: ${session.shop}`;
           provider: "vapi",
           name: `${shopName} - AI Receptionist`,
           assistantId: vapiConfig.assistantId,
-          areaCode: areaCode || undefined
         });
 
         console.log("✅ Phone number created and associated:", phoneNumber.number || phoneNumber.id);
@@ -917,16 +915,9 @@ Important: Never make up product information - always use the getProductInfo too
                   <s-text variant="headingSm" as="h3">Create a New Phone Number</s-text>
 
                   <s-text as="p">
-                    VAPI will provision a new phone number for your AI receptionist.
+                    VAPI will automatically provision a new US phone number for your AI receptionist.
                     This number will be automatically associated with your assistant.
                   </s-text>
-
-                  <s-text-field
-                    label="Preferred Area Code (Optional)"
-                    name="areaCode"
-                    placeholder="e.g., 415, 212, 310"
-                    help-text="Leave blank for automatic assignment. US numbers only."
-                  />
 
                   <s-banner tone="warning">
                     <p><strong>Important:</strong> Phone numbers are billed separately by VAPI. Check VAPI pricing for details.</p>
