@@ -47,7 +47,7 @@ export const action = async ({ request }) => {
       payload
     });
 
-    console.log('✅ GDPR shop redaction request logged:', gdprRequest.id);
+    console.log('✅ GDPR shop redaction request logged:', gdprRequest?.id);
 
     // Redact (delete) ALL shop data
     try {
@@ -84,7 +84,7 @@ export const action = async ({ request }) => {
 
       // Try to mark as failed, but this might also fail if DB is corrupted
       try {
-        await updateGdprRequestStatus(gdprRequest.id, 'failed');
+        await updateGdprRequestStatus(gdprRequest?.id, 'failed');
       } catch (updateError) {
         console.error('❌ Could not update GDPR request status:', updateError.message);
       }
