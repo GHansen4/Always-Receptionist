@@ -204,3 +204,140 @@ export async function updateVapiAssistant(assistantId, updates) {
 
   return await response.json();
 }
+
+/**
+ * List all phone numbers in the VAPI account
+ */
+export async function listPhoneNumbers() {
+  console.log("📞 Fetching phone numbers from VAPI...");
+
+  const response = await fetch(`${VAPI_BASE_URL}/phone-number`, {
+    method: "GET",
+    headers: {
+      "Authorization": `Bearer ${VAPI_PRIVATE_KEY}`,
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    console.error("❌ Failed to fetch phone numbers:", error);
+    throw new Error(`Failed to fetch phone numbers: ${response.statusText}`);
+  }
+
+  const phoneNumbers = await response.json();
+  console.log(`✅ Found ${phoneNumbers.length} phone numbers`);
+
+  return phoneNumbers;
+}
+
+/**
+ * Create/buy a new phone number via VAPI
+ *
+ * @param {Object} options - Phone number options
+ * @param {string} options.provider - Telephony provider (e.g., "vapi", "twilio", "vonage")
+ * @param {string} options.name - Friendly name for the phone number
+ * @param {string} options.assistantId - Optional: Auto-associate with assistant
+ * @param {string} options.fallbackDestination - Optional: Fallback number if assistant fails
+ * @param {string} options.areaCode - Optional: Preferred area code (e.g., "415" for San Francisco)
+ * @returns {Object} Created phone number object
+ */
+export async function createPhoneNumber({
+  provider = "vapi",
+  name,
+  assistantId = null,
+  fallbackDestination = null,
+  areaCode = null
+}) {
+  console.log("📞 Creating new phone number via VAPI...");
+  console.log("   Provider:", provider);
+  console.log("   Name:", name);
+  console.log("   Area Code:", areaCode || "auto");
+  console.log("   Assistant ID:", assistantId || "none");
+
+  const payload = {
+    provider,
+    ...(name && { name }),
+    ...(assistantId && { assistantId }),
+    ...(fallbackDestination && { fallbackDestination }),
+    ...(areaCode && { numberE164CheckEnabled: false, areaCode })
+  };
+
+  const response = await fetch(`${VAPI_BASE_URL}/phone-number`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${VAPI_PRIVATE_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    console.error("❌ Failed to create phone number:", error);
+    throw new Error(`Failed to create phone number: ${error}`);
+  }
+
+  const phoneNumber = await response.json();
+  console.log("✅ Phone number created:", phoneNumber.number || phoneNumber.id);
+
+  return phoneNumber;
+}
+
+/**
+ * Associate a phone number with an assistant
+ *
+ * @param {string} phoneNumberId - VAPI phone number ID
+ * @param {string} assistantId - VAPI assistant ID
+ * @returns {Object} Updated phone number object
+ */
+export async function associatePhoneWithAssistant(phoneNumberId, assistantId) {
+  console.log("🔗 Associating phone number with assistant...");
+  console.log("   Phone Number ID:", phoneNumberId);
+  console.log("   Assistant ID:", assistantId);
+
+  const response = await fetch(`${VAPI_BASE_URL}/phone-number/${phoneNumberId}`, {
+    method: "PATCH",
+    headers: {
+      "Authorization": `Bearer ${VAPI_PRIVATE_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ assistantId }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    console.error("❌ Failed to associate phone number:", error);
+    throw new Error(`Failed to associate phone number: ${error}`);
+  }
+
+  const phoneNumber = await response.json();
+  console.log("✅ Phone number associated successfully");
+
+  return phoneNumber;
+}
+
+/**
+ * Delete a phone number from VAPI account
+ *
+ * @param {string} phoneNumberId - VAPI phone number ID
+ * @returns {boolean} Success status
+ */
+export async function deletePhoneNumber(phoneNumberId) {
+  console.log("🗑️ Deleting phone number:", phoneNumberId);
+
+  const response = await fetch(`${VAPI_BASE_URL}/phone-number/${phoneNumberId}`, {
+    method: "DELETE",
+    headers: {
+      "Authorization": `Bearer ${VAPI_PRIVATE_KEY}`,
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    console.error("❌ Failed to delete phone number:", error);
+    throw new Error(`Failed to delete phone number: ${error}`);
+  }
+
+  console.log("✅ Phone number deleted successfully");
+  return true;
+}

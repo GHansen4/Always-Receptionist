@@ -3,6 +3,11 @@ import { useLoaderData, useSubmit, useNavigation, useActionData } from "react-ro
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
+import {
+  listPhoneNumbers,
+  createPhoneNumber,
+  associatePhoneWithAssistant
+} from "../utils/vapi.server";
 
 // Loader: Check if assistant exists
 export async function loader({ request }) {
@@ -417,6 +422,58 @@ The store you're representing is: ${session.shop}`;
       };
     }
 
+    if (action === "create_phone") {
+      console.log("Creating new phone number via VAPI...");
+
+      const vapiConfig = await prisma.vapiConfig.findUnique({
+        where: { shop: session.shop }
+      });
+
+      if (!vapiConfig?.assistantId) {
+        return {
+          success: false,
+          error: "No assistant found. Please create an assistant first."
+        };
+      }
+
+      const areaCode = formData.get("areaCode") || null;
+      const shopName = session.shop.replace('.myshopify.com', '');
+
+      try {
+        // Create the phone number and auto-associate with assistant
+        const phoneNumber = await createPhoneNumber({
+          provider: "vapi",
+          name: `${shopName} - AI Receptionist`,
+          assistantId: vapiConfig.assistantId,
+          areaCode: areaCode || undefined
+        });
+
+        console.log("✅ Phone number created and associated:", phoneNumber.number || phoneNumber.id);
+
+        // Store the phone number info in VapiConfig
+        await prisma.vapiConfig.update({
+          where: { shop: session.shop },
+          data: {
+            phoneNumber: phoneNumber.number,
+            phoneNumberId: phoneNumber.id
+          }
+        });
+
+        return {
+          success: true,
+          message: `Phone number ${phoneNumber.number} created and associated successfully!`,
+          phoneNumber: phoneNumber.number
+        };
+
+      } catch (error) {
+        console.error("❌ Failed to create phone number:", error);
+        return {
+          success: false,
+          error: `Failed to create phone number: ${error.message}`
+        };
+      }
+    }
+
     if (action === "associate_phone") {
       console.log("Associating phone number with assistant...");
 
@@ -491,12 +548,14 @@ export default function Assistant() {
 
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
+  const [showCreatePhoneForm, setShowCreatePhoneForm] = useState(false);
 
   // Close forms on successful action
   useEffect(() => {
     if (actionData?.success) {
       setShowCreateForm(false);
       setShowEditForm(false);
+      setShowCreatePhoneForm(false);
     }
   }, [actionData]);
 
@@ -529,6 +588,14 @@ export default function Assistant() {
     const form = event.currentTarget;
     const formData = new FormData(form);
     formData.append("action", "associate_phone");
+    submit(formData, { method: "post" });
+  };
+
+  const handleCreatePhone = (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    formData.append("action", "create_phone");
     submit(formData, { method: "post" });
   };
 
@@ -742,23 +809,125 @@ Important: Never make up product information - always use the getProductInfo too
                   ))}
                 </s-select>
 
-                <s-button
-                  type="submit"
-                  variant="primary"
-                  {...(isLoading ? { loading: true } : {})}
-                >
-                  Associate Phone Number
-                </s-button>
+                <s-stack direction="inline" gap="base">
+                  <s-button
+                    type="submit"
+                    variant="primary"
+                    {...(isLoading ? { loading: true } : {})}
+                  >
+                    Associate Phone Number
+                  </s-button>
+                  <s-button
+                    type="button"
+                    onClick={() => setShowCreatePhoneForm(true)}
+                    disabled={isLoading}
+                  >
+                    Create New Phone Number
+                  </s-button>
+                </s-stack>
               </s-stack>
             </form>
+
+            {showCreatePhoneForm && (
+              <s-box padding="large" borderWidth="base" borderRadius="base" background="subdued">
+                <form onSubmit={handleCreatePhone}>
+                  <s-stack direction="block" gap="base">
+                    <s-text variant="headingSm" as="h3">Create Additional Phone Number</s-text>
+
+                    <s-text as="p">
+                      VAPI will provision a new phone number that will be automatically
+                      associated with your assistant.
+                    </s-text>
+
+                    <s-text-field
+                      label="Preferred Area Code (Optional)"
+                      name="areaCode"
+                      placeholder="e.g., 415, 212, 310"
+                      help-text="Leave blank for automatic assignment. US numbers only."
+                    />
+
+                    <s-banner tone="warning">
+                      <s-text as="p">
+                        <strong>Note:</strong> Each phone number is billed separately by VAPI.
+                      </s-text>
+                    </s-banner>
+
+                    <s-stack direction="inline" gap="base">
+                      <s-button
+                        type="submit"
+                        variant="primary"
+                        {...(isLoading ? { loading: true } : {})}
+                      >
+                        Create Phone Number
+                      </s-button>
+                      <s-button
+                        type="button"
+                        onClick={() => setShowCreatePhoneForm(false)}
+                        disabled={isLoading}
+                      >
+                        Cancel
+                      </s-button>
+                    </s-stack>
+                  </s-stack>
+                </form>
+              </s-box>
+            )}
           </s-section>
         )}
 
         {hasAssistant && phoneNumbers && phoneNumbers.length === 0 && (
           <s-section heading="Phone Number">
             <s-banner tone="info">
-              <p>No phone numbers found in your VAPI account. Please create a phone number in VAPI first.</p>
+              <p>You need a phone number for customers to call your AI assistant.</p>
             </s-banner>
+
+            {!showCreatePhoneForm ? (
+              <s-button
+                variant="primary"
+                onClick={() => setShowCreatePhoneForm(true)}
+              >
+                Create Phone Number
+              </s-button>
+            ) : (
+              <form onSubmit={handleCreatePhone}>
+                <s-stack direction="block" gap="large">
+                  <s-text variant="headingSm" as="h3">Create a New Phone Number</s-text>
+
+                  <s-text as="p">
+                    VAPI will provision a new phone number for your AI receptionist.
+                    This number will be automatically associated with your assistant.
+                  </s-text>
+
+                  <s-text-field
+                    label="Preferred Area Code (Optional)"
+                    name="areaCode"
+                    placeholder="e.g., 415, 212, 310"
+                    help-text="Leave blank for automatic assignment. US numbers only."
+                  />
+
+                  <s-banner tone="warning">
+                    <p><strong>Important:</strong> Phone numbers are billed separately by VAPI. Check VAPI pricing for details.</p>
+                  </s-banner>
+
+                  <s-stack direction="inline" gap="base">
+                    <s-button
+                      type="submit"
+                      variant="primary"
+                      {...(isLoading ? { loading: true } : {})}
+                    >
+                      Create & Associate Phone Number
+                    </s-button>
+                    <s-button
+                      type="button"
+                      onClick={() => setShowCreatePhoneForm(false)}
+                      disabled={isLoading}
+                    >
+                      Cancel
+                    </s-button>
+                  </s-stack>
+                </s-stack>
+              </form>
+            )}
           </s-section>
         )}
       </s-block-stack>
