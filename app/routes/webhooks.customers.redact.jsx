@@ -56,7 +56,7 @@ export const action = async ({ request }) => {
       payload
     });
 
-    console.log('✅ GDPR redaction request logged:', gdprRequest.id);
+    console.log('✅ GDPR redaction request logged:', gdprRequest?.id);
 
     // Redact (delete) customer data
     try {
@@ -71,7 +71,7 @@ export const action = async ({ request }) => {
       console.log('Deleted records:', result.deletedRecords);
 
       // Mark request as completed
-      await updateGdprRequestStatus(gdprRequest.id, 'completed');
+      await updateGdprRequestStatus(gdprRequest?.id, 'completed');
 
       console.log('='.repeat(60));
       console.log('✅ customers/redact webhook processed successfully');
@@ -81,7 +81,7 @@ export const action = async ({ request }) => {
       // Return 200 OK to acknowledge receipt
       return new Response(JSON.stringify({
         success: true,
-        requestId: gdprRequest.id,
+        requestId: gdprRequest?.id,
         deletedRecords: result.deletedRecords,
         message: 'Customer data redacted successfully'
       }), {
@@ -91,7 +91,7 @@ export const action = async ({ request }) => {
 
     } catch (redactionError) {
       console.error('❌ Error redacting customer data:', redactionError);
-      await updateGdprRequestStatus(gdprRequest.id, 'failed');
+      await updateGdprRequestStatus(gdprRequest?.id, 'failed');
       throw redactionError;
     }
 

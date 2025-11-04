@@ -167,9 +167,20 @@ export async function redactShopData(shop) {
       });
 
       // Delete all GDPR request records for this shop
-      const deletedGdprRequests = await tx.gdprRequest.deleteMany({
-        where: { shop }
-      });
+      // Gracefully handle if table doesn't exist yet (migration not run)
+      let deletedGdprRequests = { count: 0 };
+      try {
+        deletedGdprRequests = await tx.gdprRequest.deleteMany({
+          where: { shop }
+        });
+      } catch (gdprError) {
+        // Table doesn't exist yet - this is OK, just log it
+        if (gdprError.code === 'P2021') {
+          console.log('⚠️ GdprRequest table does not exist yet - skipping (run migration)');
+        } else {
+          throw gdprError;
+        }
+      }
 
       return {
         sessions: deletedSessions.count,
@@ -196,9 +207,10 @@ export async function redactShopData(shop) {
 
 /**
  * Log a GDPR request to the database for audit trail
+ * Gracefully handles missing GdprRequest table (if migration not run yet)
  *
  * @param {Object} params - Request parameters
- * @returns {Object} Created GdprRequest record
+ * @returns {Object} Created GdprRequest record or null if table doesn't exist
  */
 export async function logGdprRequest({
   shop,
@@ -231,6 +243,12 @@ export async function logGdprRequest({
     return gdprRequest;
 
   } catch (error) {
+    // If table doesn't exist yet (migration not run), log warning but don't fail
+    if (error.code === 'P2021') {
+      console.log('⚠️ GdprRequest table does not exist yet - request not logged (run migration)');
+      return null;
+    }
+
     console.error('❌ Error logging GDPR request:', error);
     throw error;
   }
@@ -238,12 +256,19 @@ export async function logGdprRequest({
 
 /**
  * Mark a GDPR request as completed
+ * Gracefully handles missing GdprRequest table (if migration not run yet)
  *
- * @param {string} requestId - GDPR request ID
+ * @param {string} requestId - GDPR request ID (can be null if table doesn't exist)
  * @param {string} status - "completed" or "failed"
- * @returns {Object} Updated GdprRequest record
+ * @returns {Object} Updated GdprRequest record or null if table doesn't exist
  */
 export async function updateGdprRequestStatus(requestId, status) {
+  // If requestId is null (table didn't exist when request was logged), skip update
+  if (!requestId) {
+    console.log('⚠️ No GDPR request ID - skipping status update');
+    return null;
+  }
+
   console.log('📝 Updating GDPR request status...');
   console.log('Request ID:', requestId);
   console.log('New status:', status);
@@ -261,6 +286,12 @@ export async function updateGdprRequestStatus(requestId, status) {
     return updatedRequest;
 
   } catch (error) {
+    // If table doesn't exist yet (migration not run), log warning but don't fail
+    if (error.code === 'P2021') {
+      console.log('⚠️ GdprRequest table does not exist yet - status not updated (run migration)');
+      return null;
+    }
+
     console.error('❌ Error updating GDPR request status:', error);
     throw error;
   }

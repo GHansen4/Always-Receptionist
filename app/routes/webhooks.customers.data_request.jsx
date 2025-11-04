@@ -55,7 +55,7 @@ export const action = async ({ request }) => {
       payload
     });
 
-    console.log('✅ GDPR request logged:', gdprRequest.id);
+    console.log('✅ GDPR request logged:', gdprRequest?.id || 'not logged (table missing)');
 
     // Collect customer data
     try {
@@ -73,7 +73,7 @@ export const action = async ({ request }) => {
       });
 
       // Mark request as completed
-      await updateGdprRequestStatus(gdprRequest.id, 'completed');
+      await updateGdprRequestStatus(gdprRequest?.id, 'completed');
 
       // TODO: Send the customer data to the merchant
       // Options:
@@ -91,7 +91,7 @@ export const action = async ({ request }) => {
 
     } catch (collectionError) {
       console.error('❌ Error collecting customer data:', collectionError);
-      await updateGdprRequestStatus(gdprRequest.id, 'failed');
+      await updateGdprRequestStatus(gdprRequest?.id, 'failed');
     }
 
     console.log('='.repeat(60));
@@ -101,7 +101,7 @@ export const action = async ({ request }) => {
     // Return 200 OK to acknowledge receipt
     return new Response(JSON.stringify({
       success: true,
-      requestId: gdprRequest.id,
+      requestId: gdprRequest?.id || 'not-logged',
       message: 'Customer data request received and processed'
     }), {
       status: 200,
