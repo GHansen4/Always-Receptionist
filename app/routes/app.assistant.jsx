@@ -4,9 +4,7 @@ import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
 import {
-  listPhoneNumbers,
-  createPhoneNumber,
-  associatePhoneWithAssistant
+  createPhoneNumber
 } from "../utils/vapi.server";
 
 // Loader: Check if assistant exists
