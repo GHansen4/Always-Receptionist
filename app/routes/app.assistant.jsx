@@ -71,7 +71,13 @@ export async function loader({ request }) {
     if (error.status === 401 || error.statusCode === 401) {
       throw error;
     }
-    return { error: error.message };
+    return {
+      error: error.message,
+      hasAssistant: false,
+      assistant: null,
+      phoneNumbers: [],
+      shop: null
+    };
   }
 }
 
@@ -615,19 +621,37 @@ export default function Assistant() {
         )}
 
         {!hasAssistant ? (
-          <s-section heading="Create AI Assistant">
-            <s-text as="p">
-              Set up your AI assistant to handle customer calls. Configure the voice, behavior, and responses.
-            </s-text>
+          <>
+            <s-banner tone="info">
+              <s-block-stack gap="200">
+                <s-text as="p">
+                  <strong>Setup Steps:</strong>
+                </s-text>
+                <s-text as="p">
+                  1️⃣ Create your AI assistant (configure voice and behavior)
+                </s-text>
+                <s-text as="p">
+                  2️⃣ Create or connect a phone number
+                </s-text>
+                <s-text as="p">
+                  3️⃣ Start receiving calls!
+                </s-text>
+              </s-block-stack>
+            </s-banner>
 
-            {!showCreateForm ? (
-              <s-button
-                variant="primary"
-                size="large"
-                onClick={() => setShowCreateForm(true)}
-              >
-                Create Assistant
-              </s-button>
+            <s-section heading="Create AI Assistant">
+              <s-text as="p">
+                Set up your AI assistant to handle customer calls. Configure the voice, behavior, and responses.
+              </s-text>
+
+              {!showCreateForm ? (
+                <s-button
+                  variant="primary"
+                  size="large"
+                  onClick={() => setShowCreateForm(true)}
+                >
+                  Create Assistant
+                </s-button>
             ) : (
               <form onSubmit={handleCreateAssistant}>
                 <s-stack direction="block" gap="large">
@@ -696,6 +720,7 @@ Important: Never make up product information - always use the getProductInfo too
               </form>
             )}
           </s-section>
+          </>
         ) : (
           <s-section heading="AI Assistant Configuration">
             {!showEditForm ? (
