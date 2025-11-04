@@ -605,7 +605,7 @@ export default function Assistant() {
 
   return (
     <s-page heading="AI Assistant">
-      <s-block-stack gap="600">
+      <s-block-stack gap="800">
         {actionData?.success && (
           <s-banner tone="success">
             <p>{actionData.message}</p>
@@ -620,7 +620,7 @@ export default function Assistant() {
 
         {!hasAssistant ? (
           <>
-            <s-card>
+            <s-card padding="600">
               <s-block-stack gap="400">
                 <s-banner tone="info">
                   <s-block-stack gap="300">
@@ -646,7 +646,7 @@ export default function Assistant() {
               </s-block-stack>
             </s-card>
 
-            <s-card>
+            <s-card padding="600">
               <s-block-stack gap="500">
                 <s-block-stack gap="200">
                   <s-text variant="headingMd" as="h2">Create AI Assistant</s-text>
@@ -738,7 +738,7 @@ Important: Never make up product information - always use the getProductInfo too
             </s-card>
           </>
         ) : (
-          <s-card>
+          <s-card padding="600">
             <s-block-stack gap="500">
               <s-block-stack gap="200">
                 <s-text variant="headingMd" as="h2">AI Assistant Configuration</s-text>
@@ -851,7 +851,7 @@ Important: Never make up product information - always use the getProductInfo too
         )}
 
         {hasAssistant && phoneNumbers && phoneNumbers.length > 0 && (
-          <s-card>
+          <s-card padding="600">
             <s-block-stack gap="500">
               <s-block-stack gap="200">
                 <s-text variant="headingMd" as="h2">Phone Number</s-text>
@@ -949,7 +949,7 @@ Important: Never make up product information - always use the getProductInfo too
         )}
 
         {hasAssistant && phoneNumbers && phoneNumbers.length === 0 && (
-          <s-card>
+          <s-card padding="600">
             <s-block-stack gap="500">
               <s-block-stack gap="200">
                 <s-text variant="headingMd" as="h2">Phone Number</s-text>
