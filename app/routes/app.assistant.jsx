@@ -618,16 +618,16 @@ export default function Assistant() {
         <>
           {/* Getting Started */}
           <s-section heading="Getting Started">
-            <s-text as="p">
+            <s-paragraph>
               Set up your AI assistant to handle customer calls. You'll configure the voice, 
               behavior, and phone number.
-            </s-text>
+            </s-paragraph>
             
             <s-banner tone="info">
-              <s-text as="p" fontWeight="semibold">Setup Steps:</s-text>
-              <s-text as="p">1. Create your AI assistant (configure voice and behavior)</s-text>
-              <s-text as="p">2. Create or connect a phone number</s-text>
-              <s-text as="p">3. Start receiving calls!</s-text>
+              <s-paragraph fontWeight="semibold">Setup Steps:</s-paragraph>
+              <s-paragraph>1. Create your AI assistant (configure voice and behavior)</s-paragraph>
+              <s-paragraph>2. Create or connect a phone number</s-paragraph>
+              <s-paragraph>3. Start receiving calls!</s-paragraph>
             </s-banner>
 
             {!showCreateForm ? (
@@ -709,20 +709,20 @@ Important: Never make up product information - always use the available tools.`}
           <s-section heading="Assistant Configuration">
             {!showEditForm ? (
               <>
-                <s-text variant="bodySm" tone="subdued" as="p">Greeting Message</s-text>
-                <s-text as="p">{assistant?.firstMessage || 'Not set'}</s-text>
+                <s-paragraph variant="bodySm" tone="subdued">Greeting Message</s-paragraph>
+                <s-paragraph>{assistant?.firstMessage || 'Not set'}</s-paragraph>
 
                 {assistant?.voice && (
                   <>
-                    <s-text variant="bodySm" tone="subdued" as="p">Voice</s-text>
-                    <s-text as="p">{assistant.voice.voiceId}</s-text>
+                    <s-paragraph variant="bodySm" tone="subdued">Voice</s-paragraph>
+                    <s-paragraph>{assistant.voice.voiceId}</s-paragraph>
                   </>
                 )}
 
                 {assistant?.model && (
                   <>
-                    <s-text variant="bodySm" tone="subdued" as="p">About Your Business</s-text>
-                    <s-text as="p">{assistant.model.systemPrompt?.substring(0, 150)}...</s-text>
+                    <s-paragraph variant="bodySm" tone="subdued">About Your Business</s-paragraph>
+                    <s-paragraph>{assistant.model.systemPrompt?.substring(0, 150)}...</s-paragraph>
                   </>
                 )}
 
@@ -796,9 +796,9 @@ Important: Never make up product information - always use the available tools.`}
           <s-section heading="Phone Number">
             {phoneNumbers && phoneNumbers.length > 0 ? (
               <>
-                <s-text as="p">
+                <s-paragraph>
                   Associate your assistant with a phone number from your VAPI account.
-                </s-text>
+                </s-paragraph>
 
                 <form onSubmit={handleAssociatePhone}>
                   <s-select
@@ -838,10 +838,10 @@ Important: Never make up product information - always use the available tools.`}
                     <form onSubmit={handleCreatePhone}>
                       <s-text variant="headingSm" as="h3">Create New Phone Number</s-text>
 
-                      <s-text as="p">
+                      <s-paragraph>
                         VAPI will provision a new phone number that will be automatically
                         associated with your assistant.
-                      </s-text>
+                      </s-paragraph>
 
                       <s-text-field
                         label="Preferred Area Code (Optional)"
@@ -876,9 +876,9 @@ Important: Never make up product information - always use the available tools.`}
               </>
             ) : (
               <>
-                <s-text as="p">
+                <s-paragraph>
                   You need a phone number for customers to call your AI assistant.
-                </s-text>
+                </s-paragraph>
 
                 <s-banner tone="info">
                   Create a phone number to start receiving calls.
@@ -894,10 +894,10 @@ Important: Never make up product information - always use the available tools.`}
                   </s-button>
                 ) : (
                   <form onSubmit={handleCreatePhone}>
-                    <s-text as="p">
+                    <s-paragraph>
                       VAPI will automatically provision a new US phone number for your AI receptionist.
                       This number will be automatically associated with your assistant.
-                    </s-text>
+                    </s-paragraph>
 
                     <s-banner tone="warning">
                       Important: Phone numbers are billed separately by VAPI. Check VAPI pricing for details.
