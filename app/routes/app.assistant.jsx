@@ -625,9 +625,11 @@ export default function Assistant() {
             
             <s-banner tone="info">
               <s-paragraph fontWeight="semibold">Setup Steps:</s-paragraph>
-              <s-paragraph>1. Create your AI assistant (configure voice and behavior)</s-paragraph>
-              <s-paragraph>2. Create or connect a phone number</s-paragraph>
-              <s-paragraph>3. Start receiving calls!</s-paragraph>
+              <s-ordered-list>
+                <s-list-item>Create your AI assistant (configure voice and behavior)</s-list-item>
+                <s-list-item>Create or connect a phone number</s-list-item>
+                <s-list-item>Start receiving calls!</s-list-item>
+              </s-ordered-list>
             </s-banner>
 
             {!showCreateForm ? (
@@ -682,7 +684,7 @@ Important: Never make up product information - always use the available tools.`}
                 <input type="hidden" name="model" value="gpt-4o-mini" />
                 <input type="hidden" name="temperature" value="0.7" />
 
-                <s-stack gap="base" display="inline">
+                <s-stack direction="inline" gap="base">
                   <s-button
                     type="submit"
                     variant="primary"
@@ -726,7 +728,7 @@ Important: Never make up product information - always use the available tools.`}
                   </>
                 )}
 
-                <s-stack gap="base" display="inline">
+                <s-stack direction="inline" gap="base">
                   <s-button
                     variant="primary"
                     onClick={() => setShowEditForm(true)}
@@ -772,7 +774,7 @@ Important: Never make up product information - always use the available tools.`}
                   helpText="Tell the assistant about your business and how to help customers"
                 />
 
-                <s-stack gap="base" display="inline">
+                <s-stack direction="inline" gap="base">
                   <s-button
                     type="submit"
                     variant="primary"
@@ -815,7 +817,7 @@ Important: Never make up product information - always use the available tools.`}
                     ))}
                   </s-select>
 
-                  <s-stack gap="base" display="inline">
+                  <s-stack direction="inline" gap="base">
                     <s-button
                       type="submit"
                       variant="primary"
@@ -854,7 +856,7 @@ Important: Never make up product information - always use the available tools.`}
                         Note: Each phone number is billed separately by VAPI.
                       </s-banner>
 
-                      <s-stack gap="base" display="inline">
+                      <s-stack direction="inline" gap="base">
                         <s-button
                           type="submit"
                           variant="primary"
@@ -903,7 +905,7 @@ Important: Never make up product information - always use the available tools.`}
                       Important: Phone numbers are billed separately by VAPI. Check VAPI pricing for details.
                     </s-banner>
 
-                    <s-stack gap="base" display="inline">
+                    <s-stack direction="inline" gap="base">
                       <s-button
                         type="submit"
                         variant="primary"
