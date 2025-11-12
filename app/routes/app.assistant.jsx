@@ -112,8 +112,8 @@ export async function action({ request }) {
       // Build assistant payload from form data
       const shopName = session.shop.replace('.myshopify.com', '');
       const assistantName = formData.get("assistantName") || `${shopName} Receptionist`;
-      const voiceProvider = formData.get("voiceProvider") || "openai";
-      const voiceId = formData.get("voiceId") || "echo";
+      const voiceProvider = formData.get("voiceProvider") || "11labs";
+      const voiceId = formData.get("voiceId") || "xctasy8XvGp2cVO9HL9k";
       const model = formData.get("model") || "gpt-4o";
       const temperature = parseFloat(formData.get("temperature") || "0.7");
       const firstMessage = formData.get("firstMessage") || "Hi! Thanks for calling. How can I help you today?";
@@ -313,7 +313,7 @@ The store you're representing is: ${session.shop}`;
       // Build update payload
       const payload = {
         voice: {
-          provider: "openai",
+          provider: "11labs",
           voiceId: voiceId,
         },
         firstMessage: firstMessage,
@@ -653,14 +653,14 @@ export default function Assistant() {
                   <s-select
                     label="Voice Selection"
                     name="voiceId"
-                    value="echo"
+                    value="xctasy8XvGp2cVO9HL9k"
                   >
-                    <s-option value="alloy">Alloy (Neutral)</s-option>
-                    <s-option value="echo">Echo (Male)</s-option>
-                    <s-option value="fable">Fable (British Male)</s-option>
-                    <s-option value="onyx">Onyx (Deep Male)</s-option>
-                    <s-option value="nova">Nova (Female)</s-option>
-                    <s-option value="shimmer">Shimmer (Soft Female)</s-option>
+                    <s-option value="xctasy8XvGp2cVO9HL9k">Allison</s-option>
+                    <s-option value="FVQMzxJGPUBtfz1Azdoy">Danielle</s-option>
+                    <s-option value="dMyQqiVXTU80dDl2eNK8">Erin</s-option>
+                    <s-option value="DwwuoY7Uz8AP8zrY5TAo">Sean</s-option>
+                    <s-option value="DHeSUVQvhhYeIxNUbtj3">Chris</s-option>
+                    <s-option value="2BJW5coyhAzSr8STdHbE">Edward</s-option>
                   </s-select>
 
                   <s-text-area
@@ -679,7 +679,7 @@ Important: Never make up product information - always use the available tools.`}
                   />
 
                   {/* Hidden fields for defaults */}
-                  <input type="hidden" name="voiceProvider" value="openai" />
+                  <input type="hidden" name="voiceProvider" value="11labs" />
                   <input type="hidden" name="assistantName" value={`${shopName} Receptionist`} />
                   <input type="hidden" name="endCallMessage" value="Thanks for calling! Have a great day!" />
                   <input type="hidden" name="model" value="gpt-4o-mini" />
@@ -759,14 +759,14 @@ Important: Never make up product information - always use the available tools.`}
                   <s-select
                     label="Voice Selection"
                     name="voiceId"
-                    value={assistant?.voice?.voiceId || "echo"}
+                    value={assistant?.voice?.voiceId || "xctasy8XvGp2cVO9HL9k"}
                   >
-                    <s-option value="alloy">Alloy (Neutral)</s-option>
-                    <s-option value="echo">Echo (Male)</s-option>
-                    <s-option value="fable">Fable (British Male)</s-option>
-                    <s-option value="onyx">Onyx (Deep Male)</s-option>
-                    <s-option value="nova">Nova (Female)</s-option>
-                    <s-option value="shimmer">Shimmer (Soft Female)</s-option>
+                    <s-option value="xctasy8XvGp2cVO9HL9k">Allison</s-option>
+                    <s-option value="FVQMzxJGPUBtfz1Azdoy">Danielle</s-option>
+                    <s-option value="dMyQqiVXTU80dDl2eNK8">Erin</s-option>
+                    <s-option value="DwwuoY7Uz8AP8zrY5TAo">Sean</s-option>
+                    <s-option value="DHeSUVQvhhYeIxNUbtj3">Chris</s-option>
+                    <s-option value="2BJW5coyhAzSr8STdHbE">Edward</s-option>
                   </s-select>
 
                   <s-text-area
