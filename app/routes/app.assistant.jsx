@@ -642,31 +642,32 @@ export default function Assistant() {
               </s-button>
             ) : (
               <form onSubmit={handleCreateAssistant}>
-                <s-text-area
-                  label="Greeting Message"
-                  name="firstMessage"
-                  value="Hi! Thanks for calling. How can I help you today?"
-                  helpText="What the assistant says when answering the call"
-                />
+                <s-stack gap="base">
+                  <s-text-area
+                    label="Greeting Message"
+                    name="firstMessage"
+                    value="Hi! Thanks for calling. How can I help you today?"
+                    helpText="What the assistant says when answering the call"
+                  />
 
-                <s-select
-                  label="Voice Selection"
-                  name="voiceId"
-                  value="echo"
-                >
-                  <s-option value="alloy">Alloy (Neutral)</s-option>
-                  <s-option value="echo">Echo (Male)</s-option>
-                  <s-option value="fable">Fable (British Male)</s-option>
-                  <s-option value="onyx">Onyx (Deep Male)</s-option>
-                  <s-option value="nova">Nova (Female)</s-option>
-                  <s-option value="shimmer">Shimmer (Soft Female)</s-option>
-                </s-select>
+                  <s-select
+                    label="Voice Selection"
+                    name="voiceId"
+                    value="echo"
+                  >
+                    <s-option value="alloy">Alloy (Neutral)</s-option>
+                    <s-option value="echo">Echo (Male)</s-option>
+                    <s-option value="fable">Fable (British Male)</s-option>
+                    <s-option value="onyx">Onyx (Deep Male)</s-option>
+                    <s-option value="nova">Nova (Female)</s-option>
+                    <s-option value="shimmer">Shimmer (Soft Female)</s-option>
+                  </s-select>
 
-                <s-text-area
-                  label="About Your Business"
-                  name="systemPrompt"
-                  multiline="6"
-                  value={`You are a friendly AI receptionist for ${shopName}.
+                  <s-text-area
+                    label="About Your Business"
+                    name="systemPrompt"
+                    multiline="6"
+                    value={`You are a friendly AI receptionist for ${shopName}.
 
 Your role:
 - Answer questions about products and inventory
@@ -674,32 +675,33 @@ Your role:
 - Be helpful, professional, and concise
 
 Important: Never make up product information - always use the available tools.`}
-                  helpText="Tell the assistant about your business and how to help customers"
-                />
+                    helpText="Tell the assistant about your business and how to help customers"
+                  />
 
-                {/* Hidden fields for defaults */}
-                <input type="hidden" name="voiceProvider" value="openai" />
-                <input type="hidden" name="assistantName" value={`${shopName} Receptionist`} />
-                <input type="hidden" name="endCallMessage" value="Thanks for calling! Have a great day!" />
-                <input type="hidden" name="model" value="gpt-4o-mini" />
-                <input type="hidden" name="temperature" value="0.7" />
+                  {/* Hidden fields for defaults */}
+                  <input type="hidden" name="voiceProvider" value="openai" />
+                  <input type="hidden" name="assistantName" value={`${shopName} Receptionist`} />
+                  <input type="hidden" name="endCallMessage" value="Thanks for calling! Have a great day!" />
+                  <input type="hidden" name="model" value="gpt-4o-mini" />
+                  <input type="hidden" name="temperature" value="0.7" />
 
-                <s-stack direction="inline" gap="base">
-                  <s-button
-                    type="submit"
-                    variant="primary"
-                    size="large"
-                    loading={isLoading}
-                  >
-                    Create Assistant
-                  </s-button>
-                  <s-button
-                    type="button"
-                    onClick={() => setShowCreateForm(false)}
-                    disabled={isLoading}
-                  >
-                    Cancel
-                  </s-button>
+                  <s-stack direction="inline" gap="base">
+                    <s-button
+                      type="submit"
+                      variant="primary"
+                      size="large"
+                      loading={isLoading}
+                    >
+                      Create Assistant
+                    </s-button>
+                    <s-button
+                      type="button"
+                      onClick={() => setShowCreateForm(false)}
+                      disabled={isLoading}
+                    >
+                      Cancel
+                    </s-button>
+                  </s-stack>
                 </s-stack>
               </form>
             )}
@@ -746,49 +748,51 @@ Important: Never make up product information - always use the available tools.`}
               </>
             ) : (
               <form onSubmit={handleUpdateAssistant}>
-                <s-text-field
-                  label="Greeting Message"
-                  name="firstMessage"
-                  value={assistant?.firstMessage || ""}
-                  helpText="What the assistant says when answering the call"
-                />
+                <s-stack gap="base">
+                  <s-text-field
+                    label="Greeting Message"
+                    name="firstMessage"
+                    value={assistant?.firstMessage || ""}
+                    helpText="What the assistant says when answering the call"
+                  />
 
-                <s-select
-                  label="Voice Selection"
-                  name="voiceId"
-                  value={assistant?.voice?.voiceId || "echo"}
-                >
-                  <s-option value="alloy">Alloy (Neutral)</s-option>
-                  <s-option value="echo">Echo (Male)</s-option>
-                  <s-option value="fable">Fable (British Male)</s-option>
-                  <s-option value="onyx">Onyx (Deep Male)</s-option>
-                  <s-option value="nova">Nova (Female)</s-option>
-                  <s-option value="shimmer">Shimmer (Soft Female)</s-option>
-                </s-select>
-
-                <s-text-area
-                  label="About Your Business"
-                  name="systemPrompt"
-                  multiline="6"
-                  value={assistant?.model?.systemPrompt || ""}
-                  helpText="Tell the assistant about your business and how to help customers"
-                />
-
-                <s-stack direction="inline" gap="base">
-                  <s-button
-                    type="submit"
-                    variant="primary"
-                    loading={isLoading}
+                  <s-select
+                    label="Voice Selection"
+                    name="voiceId"
+                    value={assistant?.voice?.voiceId || "echo"}
                   >
-                    Save Changes
-                  </s-button>
-                  <s-button
-                    type="button"
-                    onClick={() => setShowEditForm(false)}
-                    disabled={isLoading}
-                  >
-                    Cancel
-                  </s-button>
+                    <s-option value="alloy">Alloy (Neutral)</s-option>
+                    <s-option value="echo">Echo (Male)</s-option>
+                    <s-option value="fable">Fable (British Male)</s-option>
+                    <s-option value="onyx">Onyx (Deep Male)</s-option>
+                    <s-option value="nova">Nova (Female)</s-option>
+                    <s-option value="shimmer">Shimmer (Soft Female)</s-option>
+                  </s-select>
+
+                  <s-text-area
+                    label="About Your Business"
+                    name="systemPrompt"
+                    multiline="6"
+                    value={assistant?.model?.systemPrompt || ""}
+                    helpText="Tell the assistant about your business and how to help customers"
+                  />
+
+                  <s-stack direction="inline" gap="base">
+                    <s-button
+                      type="submit"
+                      variant="primary"
+                      loading={isLoading}
+                    >
+                      Save Changes
+                    </s-button>
+                    <s-button
+                      type="button"
+                      onClick={() => setShowEditForm(false)}
+                      disabled={isLoading}
+                    >
+                      Cancel
+                    </s-button>
+                  </s-stack>
                 </s-stack>
               </form>
             )}
@@ -803,74 +807,78 @@ Important: Never make up product information - always use the available tools.`}
                 </s-paragraph>
 
                 <form onSubmit={handleAssociatePhone}>
-                  <s-select
-                    label="Select Phone Number"
-                    name="phoneNumberId"
-                    value={phoneNumbers.find(p => p.assistantId === assistant?.id)?.id || ""}
-                  >
-                    <s-option value="">Choose a phone number</s-option>
-                    {phoneNumbers.map((phone) => (
-                      <s-option key={phone.id} value={phone.id}>
-                        {phone.number || phone.name || phone.id}
-                        {phone.assistantId === assistant?.id ? ' (Currently associated)' : ''}
-                      </s-option>
-                    ))}
-                  </s-select>
+                  <s-stack gap="base">
+                    <s-select
+                      label="Select Phone Number"
+                      name="phoneNumberId"
+                      value={phoneNumbers.find(p => p.assistantId === assistant?.id)?.id || ""}
+                    >
+                      <s-option value="">Choose a phone number</s-option>
+                      {phoneNumbers.map((phone) => (
+                        <s-option key={phone.id} value={phone.id}>
+                          {phone.number || phone.name || phone.id}
+                          {phone.assistantId === assistant?.id ? ' (Currently associated)' : ''}
+                        </s-option>
+                      ))}
+                    </s-select>
 
-                  <s-stack direction="inline" gap="base">
-                    <s-button
-                      type="submit"
-                      variant="primary"
-                      loading={isLoading}
-                    >
-                      Associate Phone Number
-                    </s-button>
-                    <s-button
-                      type="button"
-                      onClick={() => setShowCreatePhoneForm(true)}
-                      disabled={isLoading}
-                    >
-                      Create New Number
-                    </s-button>
+                    <s-stack direction="inline" gap="base">
+                      <s-button
+                        type="submit"
+                        variant="primary"
+                        loading={isLoading}
+                      >
+                        Associate Phone Number
+                      </s-button>
+                      <s-button
+                        type="button"
+                        onClick={() => setShowCreatePhoneForm(true)}
+                        disabled={isLoading}
+                      >
+                        Create New Number
+                      </s-button>
+                    </s-stack>
                   </s-stack>
                 </form>
 
                 {showCreatePhoneForm && (
                   <s-section>
                     <form onSubmit={handleCreatePhone}>
-                      <s-text variant="headingSm" as="h3">Create New Phone Number</s-text>
+                      <s-stack gap="base">
+                        <s-text variant="headingSm" as="h3">Create New Phone Number</s-text>
 
-                      <s-paragraph>
-                        VAPI will provision a new phone number that will be automatically
-                        associated with your assistant.
-                      </s-paragraph>
+                        <s-paragraph>
+                          VAPI will provision a new phone number that will be automatically
+                          associated with your assistant.
+                        </s-paragraph>
 
-                      <s-text-field
-                        label="Preferred Area Code (Optional)"
-                        name="areaCode"
-                        placeholder="e.g., 415, 212, 310"
-                        helpText="Leave blank for automatic assignment. US numbers only."
-                      />
+                        <s-text-field
+                          label="Preferred Area Code (Optional)"
+                          name="areaCode"
+                          placeholder="e.g., 415, 212, 310"
+                          helpText="Leave blank for automatic assignment. US numbers only."
+                        />
 
-                      <s-banner tone="warning">
-                        Note: Each phone number is billed separately by VAPI.
-                      </s-banner>
+                        <s-banner tone="warning">
+                          Note: Each phone number is billed separately by VAPI.
+                        </s-banner>
 
-                      <s-stack direction="inline" gap="base">
-                        <s-button
-                          type="submit"
-                          variant="primary"
-                          loading={isLoading}
-                        >
-                          Create Phone Number
-                        </s-button>
-                        <s-button
-                          type="button"
-                          onClick={() => setShowCreatePhoneForm(false)}
-                          disabled={isLoading}
-                        >
-                          Cancel
-                        </s-button>
+                        <s-stack direction="inline" gap="base">
+                          <s-button
+                            type="submit"
+                            variant="primary"
+                            loading={isLoading}
+                          >
+                            Create Phone Number
+                          </s-button>
+                          <s-button
+                            type="button"
+                            onClick={() => setShowCreatePhoneForm(false)}
+                            disabled={isLoading}
+                          >
+                            Cancel
+                          </s-button>
+                        </s-stack>
                       </s-stack>
                     </form>
                   </s-section>
@@ -896,31 +904,33 @@ Important: Never make up product information - always use the available tools.`}
                   </s-button>
                 ) : (
                   <form onSubmit={handleCreatePhone}>
-                    <s-paragraph>
-                      VAPI will automatically provision a new US phone number for your AI receptionist.
-                      This number will be automatically associated with your assistant.
-                    </s-paragraph>
+                    <s-stack gap="base">
+                      <s-paragraph>
+                        VAPI will automatically provision a new US phone number for your AI receptionist.
+                        This number will be automatically associated with your assistant.
+                      </s-paragraph>
 
-                    <s-banner tone="warning">
-                      Important: Phone numbers are billed separately by VAPI. Check VAPI pricing for details.
-                    </s-banner>
+                      <s-banner tone="warning">
+                        Important: Phone numbers are billed separately by VAPI. Check VAPI pricing for details.
+                      </s-banner>
 
-                    <s-stack direction="inline" gap="base">
-                      <s-button
-                        type="submit"
-                        variant="primary"
-                        size="large"
-                        loading={isLoading}
-                      >
-                        Create & Associate Phone Number
-                      </s-button>
-                      <s-button
-                        type="button"
-                        onClick={() => setShowCreatePhoneForm(false)}
-                        disabled={isLoading}
-                      >
-                        Cancel
-                      </s-button>
+                      <s-stack direction="inline" gap="base">
+                        <s-button
+                          type="submit"
+                          variant="primary"
+                          size="large"
+                          loading={isLoading}
+                        >
+                          Create & Associate Phone Number
+                        </s-button>
+                        <s-button
+                          type="button"
+                          onClick={() => setShowCreatePhoneForm(false)}
+                          disabled={isLoading}
+                        >
+                          Cancel
+                        </s-button>
+                      </s-stack>
                     </s-stack>
                   </form>
                 )}
