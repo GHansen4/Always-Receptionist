@@ -552,6 +552,20 @@ export default function Assistant() {
   const [showEditForm, setShowEditForm] = useState(false);
   const [showCreatePhoneForm, setShowCreatePhoneForm] = useState(false);
 
+  // Map voice IDs to names
+  const voiceNames = {
+    'xctasy8XvGp2cVO9HL9k': 'Allison',
+    'FVQMzxJGPUBtfz1Azdoy': 'Danielle',
+    'dMyQqiVXTU80dDl2eNK8': 'Erin',
+    'DwwuoY7Uz8AP8zrY5TAo': 'Sean',
+    'DHeSUVQvhhYeIxNUbtj3': 'Chris',
+    '2BJW5coyhAzSr8STdHbE': 'Edward'
+  };
+
+  const getVoiceName = (voiceId) => {
+    return voiceNames[voiceId] || voiceId;
+  };
+
   // Close forms on successful action
   useEffect(() => {
     if (actionData?.success) {
@@ -719,7 +733,7 @@ Important: Never make up product information - always use the available tools.`}
                 {assistant?.voice && (
                   <>
                     <s-paragraph variant="bodySm" tone="subdued">Voice</s-paragraph>
-                    <s-paragraph>{assistant.voice.voiceId}</s-paragraph>
+                    <s-paragraph>{getVoiceName(assistant.voice.voiceId)}</s-paragraph>
                   </>
                 )}
 
