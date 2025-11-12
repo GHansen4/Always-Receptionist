@@ -728,20 +728,20 @@ Important: Never make up product information - always use the available tools.`}
             {!showEditForm ? (
               <s-stack gap="base">
                 <s-stack gap="small">
-                  <s-text variant="headingSm" as="h3">Greeting Message</s-text>
+                  <s-text variant="bodySm" fontWeight="semibold">Greeting Message</s-text>
                   <s-paragraph>{assistant?.firstMessage || 'Not set'}</s-paragraph>
                 </s-stack>
 
                 {assistant?.voice && (
                   <s-stack gap="small">
-                    <s-text variant="headingSm" as="h3">Voice</s-text>
+                    <s-text variant="bodySm" fontWeight="semibold">Voice</s-text>
                     <s-paragraph>{getVoiceName(assistant.voice.voiceId)}</s-paragraph>
                   </s-stack>
                 )}
 
                 {assistant?.model && (
                   <s-stack gap="small">
-                    <s-text variant="headingSm" as="h3">About Your Business</s-text>
+                    <s-text variant="bodySm" fontWeight="semibold">About Your Business</s-text>
                     <s-paragraph>{assistant.model.systemPrompt?.substring(0, 150)}...</s-paragraph>
                   </s-stack>
                 )}
