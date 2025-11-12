@@ -726,22 +726,24 @@ Important: Never make up product information - always use the available tools.`}
           {/* Assistant Configuration */}
           <s-section heading="Assistant Configuration">
             {!showEditForm ? (
-              <>
-                <s-paragraph variant="bodySm" tone="subdued">Greeting Message</s-paragraph>
-                <s-paragraph>{assistant?.firstMessage || 'Not set'}</s-paragraph>
+              <s-stack gap="base">
+                <s-stack gap="small">
+                  <s-text variant="headingSm" as="h3">Greeting Message</s-text>
+                  <s-paragraph>{assistant?.firstMessage || 'Not set'}</s-paragraph>
+                </s-stack>
 
                 {assistant?.voice && (
-                  <>
-                    <s-paragraph variant="bodySm" tone="subdued">Voice</s-paragraph>
+                  <s-stack gap="small">
+                    <s-text variant="headingSm" as="h3">Voice</s-text>
                     <s-paragraph>{getVoiceName(assistant.voice.voiceId)}</s-paragraph>
-                  </>
+                  </s-stack>
                 )}
 
                 {assistant?.model && (
-                  <>
-                    <s-paragraph variant="bodySm" tone="subdued">About Your Business</s-paragraph>
+                  <s-stack gap="small">
+                    <s-text variant="headingSm" as="h3">About Your Business</s-text>
                     <s-paragraph>{assistant.model.systemPrompt?.substring(0, 150)}...</s-paragraph>
-                  </>
+                  </s-stack>
                 )}
 
                 <s-stack direction="inline" gap="base">
@@ -759,7 +761,7 @@ Important: Never make up product information - always use the available tools.`}
                     Delete Assistant
                   </s-button>
                 </s-stack>
-              </>
+              </s-stack>
             ) : (
               <form onSubmit={handleUpdateAssistant}>
                 <s-stack gap="base">
